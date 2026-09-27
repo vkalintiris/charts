@@ -29,8 +29,10 @@ const Grid = styled.div`
   display: grid;
   width: 100%;
   max-width: 100%;
-  grid-template-columns: ${({ $dimensionColumnWidth, $infoColumn }) =>
-    `${$dimensionColumnWidth}px ${popoverGridColumns.value} ${popoverGridColumns.unit} ${popoverGridColumns.anomaly} ${$infoColumn}`};
+  grid-template-columns: ${({ $dimensionColumnWidth, $infoColumn, $valueOnly }) =>
+    $valueOnly
+      ? `${$dimensionColumnWidth}px ${popoverGridColumns.value} ${popoverGridColumns.unit}`
+      : `${$dimensionColumnWidth}px ${popoverGridColumns.value} ${popoverGridColumns.unit} ${popoverGridColumns.anomaly} ${$infoColumn}`};
   align-items: center;
 `
 
@@ -73,7 +75,7 @@ const Dimensions = () => {
     }
 
     if (isHeatmap && chart.getAttribute("heatmapPopoverHideZeros"))
-      dimensionIds = dimensionIds.filter(id => id === row || chart.getDimensionValue(id, index))
+      dimensionIds = dimensionIds.filter(id => chart.getDimensionValue(id, index))
 
     const rowIndex = dimensionIds.findIndex(id => id === row)
 
@@ -103,7 +105,8 @@ const Dimensions = () => {
     () => getPopoverDimensionColumnWidth(dimensionNames, { infoColumn }),
     [dimensionNames, infoColumn]
   )
-  const popoverWidth = getPopoverWidth(dimensionColumnWidth, infoColumn)
+  const valueOnly = isHeatmap && !!chart.getAttribute("heatmapPopoverValueOnly")
+  const popoverWidth = getPopoverWidth(dimensionColumnWidth, infoColumn, { valueOnly })
 
   return (
     <Container data-testid="chartPopover-dimensions" gap={2} $popoverWidth={popoverWidth}>
@@ -115,6 +118,7 @@ const Dimensions = () => {
         data-testid="chartPopover-grid"
         $dimensionColumnWidth={dimensionColumnWidth}
         $infoColumn={infoColumn}
+        $valueOnly={valueOnly}
       >
         <GridHeader>
           <TextMicro strong>Dimension</TextMicro>
@@ -125,20 +129,24 @@ const Dimensions = () => {
             Value
           </TextMicro>
           <span aria-hidden="true" />
-          <TextMicro
-            strong={rowFlavour === rowFlavours.ANOMALY_RATE}
-            color={rowFlavour === rowFlavours.ANOMALY_RATE ? "text" : "textLite"}
-            textAlign="right"
-          >
-            Anomaly%
-          </TextMicro>
-          <TextMicro
-            strong={rowFlavour === rowFlavours.ANNOTATIONS}
-            color={rowFlavour === rowFlavours.ANNOTATIONS ? "text" : "textLite"}
-            textAlign="right"
-          >
-            Info
-          </TextMicro>
+          {!valueOnly && (
+            <>
+              <TextMicro
+                strong={rowFlavour === rowFlavours.ANOMALY_RATE}
+                color={rowFlavour === rowFlavours.ANOMALY_RATE ? "text" : "textLite"}
+                textAlign="right"
+              >
+                Anomaly%
+              </TextMicro>
+              <TextMicro
+                strong={rowFlavour === rowFlavours.ANNOTATIONS}
+                color={rowFlavour === rowFlavours.ANNOTATIONS ? "text" : "textLite"}
+                textAlign="right"
+              >
+                Info
+              </TextMicro>
+            </>
+          )}
         </GridHeader>
         {ids.map(id => (
           <Dimension
@@ -146,6 +154,7 @@ const Dimensions = () => {
             id={id}
             strong={row === id}
             band={isHeatmap && row === id && chart.getAttribute("heatmapPopoverRowBand")}
+            valueOnly={valueOnly}
             rowFlavour={rowFlavour}
           />
         ))}

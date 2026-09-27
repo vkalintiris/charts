@@ -62,7 +62,7 @@ describe("line popover Dimensions", () => {
     )
   })
 
-  it("lists no zero rows but the hovered one with heatmapPopoverHideZeros", async () => {
+  it("lists no zero rows, not even the hovered one, with heatmapPopoverHideZeros", async () => {
     const ids = ["a", "b", "c", "d", "e", "f"]
     const { chart } = makeTestChart({
       attributes: {
@@ -82,9 +82,42 @@ describe("line popover Dimensions", () => {
 
     expect(screen.getAllByTestId("chartDimensions-name").map(node => node.textContent)).toEqual([
       "b",
-      "c",
       "d",
     ])
+  })
+
+  it("shows only the value column with heatmapPopoverValueOnly", async () => {
+    const ids = ["a", "b"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapKeepEmptyRows: true,
+        heatmapPopoverValueOnly: true,
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2]])
+    chart.updateAttribute("hoverX", [1000, "b"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    expect(screen.queryByText("Anomaly%")).not.toBeInTheDocument()
+    expect(screen.queryByText("Info")).not.toBeInTheDocument()
+    const dimensionColumnWidth = getPopoverDimensionColumnWidth(ids, {
+      infoColumn: popoverGridColumns.info,
+    })
+    expect(screen.getByTestId("chartPopover-grid")).toHaveStyle({
+      gridTemplateColumns: `${dimensionColumnWidth}px ${popoverGridColumns.value} ${popoverGridColumns.unit}`,
+    })
+    expect(screen.getByTestId("chartPopover-dimensions")).toHaveStyle({
+      width: `${getPopoverWidth(dimensionColumnWidth, popoverGridColumns.info, { valueOnly: true })}px`,
+    })
+    expect(getPopoverWidth(100, popoverGridColumns.info, { valueOnly: true })).toBe(
+      getPopoverWidth(100, popoverGridColumns.info) - 44 - 36
+    )
   })
 
   it("bands the hovered heatmap row with heatmapPopoverRowBand", async () => {

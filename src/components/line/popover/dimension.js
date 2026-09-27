@@ -97,7 +97,7 @@ const AnnotationsValue = ({ children: annotations, showFull, ...rest }) => (
   </Flex>
 )
 
-const Dimension = ({ id, strong, band = false, rowFlavour }) => {
+const Dimension = ({ id, strong, band = false, valueOnly = false, rowFlavour }) => {
   const visible = useVisibleDimensionId(id)
   const isHeatmap = useIsHeatmap()
 
@@ -130,27 +130,31 @@ const Dimension = ({ id, strong, band = false, rowFlavour }) => {
         visible={visible}
         color={rowFlavour === rowFlavours.default ? (strong ? "textFocus" : "text") : "textLite"}
       />
-      <Value
-        id={id}
-        strong={strong}
-        visible={visible}
-        valueKey="arp"
-        Component={PlainValue}
-        fractionDigits={2}
-        color={rowFlavour === rowFlavours.ANOMALY_RATE ? "anomalyTextFocus" : "anomalyText"}
-      />
-      <Value
-        textAlign="right"
-        id={id}
-        strong={strong}
-        visible={visible}
-        valueKey="pa"
-        Component={AnnotationsValue}
-        color={
-          rowFlavour === rowFlavours.ANNOTATIONS ? (strong ? "textFocus" : "text") : "textLite"
-        }
-        showFull={rowFlavour === rowFlavours.ANNOTATIONS}
-      />
+      {!valueOnly && (
+        <>
+          <Value
+            id={id}
+            strong={strong}
+            visible={visible}
+            valueKey="arp"
+            Component={PlainValue}
+            fractionDigits={2}
+            color={rowFlavour === rowFlavours.ANOMALY_RATE ? "anomalyTextFocus" : "anomalyText"}
+          />
+          <Value
+            textAlign="right"
+            id={id}
+            strong={strong}
+            visible={visible}
+            valueKey="pa"
+            Component={AnnotationsValue}
+            color={
+              rowFlavour === rowFlavours.ANNOTATIONS ? (strong ? "textFocus" : "text") : "textLite"
+            }
+            showFull={rowFlavour === rowFlavours.ANNOTATIONS}
+          />
+        </>
+      )}
     </GridRow>
   )
 }
