@@ -132,6 +132,11 @@ export default {
   heatmapCellClick: false,
   // { x: ms, id: dimensionId }: the heatmap cell drawn with an outline.
   heatmapMarkedCell: null,
+  // Outline the hovered heatmap cell next to the crosshair.
+  heatmapHoverCell: false,
+  // Heatmap popover: a background band on the hovered row; leave out rows whose value is 0 (not the hovered one).
+  heatmapPopoverRowBand: false,
+  heatmapPopoverHideZeros: false,
   heatmapPalette: null,
   heatmapColorScale: null,
   heatmapLabelUnit: null,

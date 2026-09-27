@@ -49,6 +49,41 @@ describe("crosshair", () => {
     jest.clearAllMocks()
   })
 
+  describe("heatmap hovered cell", () => {
+    const heatmap = extra => {
+      jest
+        .spyOn(chart, "getAttribute")
+        .mockImplementation(
+          key => ({ chartType: "heatmap", heatmapHoverCell: true, ...extra })[key]
+        )
+      jest.spyOn(chart, "getHeatmapYIndex").mockImplementation(id => (id === "mid" ? 1 : -1))
+      mockCtx.strokeRect = jest.fn()
+      mockDygraph.toDomYCoord = jest.fn(index => 300 - index * 20)
+      mockDygraph.toDomXCoord = jest.fn(timestamp => (timestamp - 1617946860000) / 1000)
+    }
+
+    it("outlines the hovered cell of an opted-in heatmap", () => {
+      heatmap()
+      crosshair(mockChartUI, 1, "hover", "mid")
+
+      expect(mockCtx.strokeRect).toHaveBeenCalledTimes(1)
+      const [x, y, width, height] = mockCtx.strokeRect.mock.calls[0]
+      expect([Math.round(x), Math.round(y), Math.round(width), Math.round(height)]).toEqual([
+        30, 270, 60, 20,
+      ])
+    })
+
+    it("draws no outline without the opt-in, for a click, or for an unknown row", () => {
+      heatmap({ heatmapHoverCell: false })
+      crosshair(mockChartUI, 1, "hover", "mid")
+      heatmap()
+      crosshair(mockChartUI, 1, "click", "mid")
+      crosshair(mockChartUI, 1, "hover", "ANOMALY_RATE")
+
+      expect(mockCtx.strokeRect).not.toHaveBeenCalled()
+    })
+  })
+
   describe("basic functionality", () => {
     it("draws crosshair for valid row", () => {
       crosshair(mockChartUI, 1)

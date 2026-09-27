@@ -72,6 +72,9 @@ const Dimensions = () => {
       dimensionIds = dimensionIds.filter(id => chart.isDimensionVisible(id))
     }
 
+    if (isHeatmap && chart.getAttribute("heatmapPopoverHideZeros"))
+      dimensionIds = dimensionIds.filter(id => id === row || chart.getDimensionValue(id, index))
+
     const rowIndex = dimensionIds.findIndex(id => id === row)
 
     const total = dimensionIds.length
@@ -138,7 +141,13 @@ const Dimensions = () => {
           </TextMicro>
         </GridHeader>
         {ids.map(id => (
-          <Dimension key={id} id={id} strong={row === id} rowFlavour={rowFlavour} />
+          <Dimension
+            key={id}
+            id={id}
+            strong={row === id}
+            band={isHeatmap && row === id && chart.getAttribute("heatmapPopoverRowBand")}
+            rowFlavour={rowFlavour}
+          />
         ))}
       </Grid>
       <Flex flex={false} height={3}>

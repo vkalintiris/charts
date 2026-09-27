@@ -168,7 +168,7 @@ export default (sdk, chart) => {
 
         if (row === -1) return dygraph.setSelection()
 
-        crosshair(instance, row)
+        crosshair(instance, row, "hover", dimensions[1])
       }),
       chart.onAttributeChange("clickX", dimensions => {
         const row = Array.isArray(dimensions) ? chart.getClosestRow(dimensions[0]) : -1

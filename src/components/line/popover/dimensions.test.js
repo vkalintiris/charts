@@ -62,6 +62,56 @@ describe("line popover Dimensions", () => {
     )
   })
 
+  it("lists no zero rows but the hovered one with heatmapPopoverHideZeros", async () => {
+    const ids = ["a", "b", "c", "d", "e", "f"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapKeepEmptyRows: true,
+        heatmapPopoverHideZeros: true,
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[0, 3, 0, 2, 0, 0]])
+    chart.updateAttribute("hoverX", [1000, "c"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    expect(screen.getAllByTestId("chartDimensions-name").map(node => node.textContent)).toEqual([
+      "b",
+      "c",
+      "d",
+    ])
+  })
+
+  it("bands the hovered heatmap row with heatmapPopoverRowBand", async () => {
+    const ids = ["a", "b", "c"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapKeepEmptyRows: true,
+        heatmapPopoverRowBand: true,
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 3]])
+    chart.updateAttribute("hoverX", [1000, "b"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    const banded = screen
+      .getAllByTestId("chartPopover-dimensionNameCell")
+      .filter(cell => cell.getAttribute("data-band") === "true")
+      .map(cell => cell.textContent)
+    expect(banded).toEqual(["b"])
+  })
+
   it("keeps generic more-values windowing for non-heatmap popovers", async () => {
     const ids = Array.from({ length: 12 }, (_, index) => `dim${index}`)
     const { chart } = makeTestChart({
