@@ -97,17 +97,13 @@ const AnnotationsValue = ({ children: annotations, showFull, ...rest }) => (
   </Flex>
 )
 
-const Dimension = ({ id, strong, band = false, valueOnly = false, rowFlavour }) => {
+const Dimension = ({ id, strong, valueOnly = false, rowFlavour }) => {
   const visible = useVisibleDimensionId(id)
   const isHeatmap = useIsHeatmap()
 
   return (
     <GridRow opacity={visible ? null : "weak"}>
-      <DimensionNameCell
-        data-band={band}
-        background={band ? "secondaryHighlight" : undefined}
-        round={band ? 0.5 : undefined}
-      >
+      <DimensionNameCell>
         <ColorBackground
           id={id}
           valueKey={rowValueKeys[rowFlavour] || rowValueKeys.default}

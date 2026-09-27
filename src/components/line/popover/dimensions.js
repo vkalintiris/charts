@@ -153,7 +153,6 @@ const Dimensions = () => {
             key={id}
             id={id}
             strong={row === id}
-            band={isHeatmap && row === id && chart.getAttribute("heatmapPopoverRowBand")}
             valueOnly={valueOnly}
             rowFlavour={rowFlavour}
           />

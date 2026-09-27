@@ -134,8 +134,7 @@ export default {
   heatmapMarkedCell: null,
   // Outline the hovered heatmap cell next to the crosshair.
   heatmapHoverCell: false,
-  // Heatmap popover: a background band on the hovered row; leave out rows whose value is 0.
-  heatmapPopoverRowBand: false,
+  // Heatmap popover: leave out rows whose value is 0.
   heatmapPopoverHideZeros: false,
   // Heatmap popover: only the dimension and value columns (no anomaly rate or annotations).
   heatmapPopoverValueOnly: false,

@@ -120,31 +120,6 @@ describe("line popover Dimensions", () => {
     )
   })
 
-  it("bands the hovered heatmap row with heatmapPopoverRowBand", async () => {
-    const ids = ["a", "b", "c"]
-    const { chart } = makeTestChart({
-      attributes: {
-        chartType: "heatmap",
-        groupBy: ["dimension"],
-        selectedDimensions: [],
-        selectedLegendDimensions: [],
-        heatmapKeepEmptyRows: true,
-        heatmapPopoverRowBand: true,
-      },
-    })
-
-    await loadHeatmapPayload(chart, ids, [[1, 2, 3]])
-    chart.updateAttribute("hoverX", [1000, "b"])
-
-    renderWithChart(<Dimensions />, { chart })
-
-    const banded = screen
-      .getAllByTestId("chartPopover-dimensionNameCell")
-      .filter(cell => cell.getAttribute("data-band") === "true")
-      .map(cell => cell.textContent)
-    expect(banded).toEqual(["b"])
-  })
-
   it("keeps generic more-values windowing for non-heatmap popovers", async () => {
     const ids = Array.from({ length: 12 }, (_, index) => `dim${index}`)
     const { chart } = makeTestChart({
