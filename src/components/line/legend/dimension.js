@@ -13,6 +13,7 @@ import {
   useLatestValue,
   useUnitSign,
   useIsMinimal,
+  useAttributeValue,
 } from "@/components/provider"
 import Tooltip from "@/components/tooltip"
 import { useIsHeatmap } from "@/helpers/heatmap"
@@ -110,6 +111,7 @@ const Dimension = ({ id, ref }) => {
 
   const isHeatmap = useIsHeatmap()
   const isMinimal = useIsMinimal()
+  const keepValueRow = useAttributeValue("legendKeepValueRow")
 
   return (
     <DimensionContainer
@@ -133,6 +135,9 @@ const Dimension = ({ id, ref }) => {
             <Flex gap={1} alignItems="end" data-testid="chartLegendDimension-valueContainer" flex>
               <Value id={id} strong visible={visible} Component={TextBig} scaleByValue />
               <Units visible={visible} dimensionId={id} value={value} scaleByValue />
+              {!visible && keepValueRow && (
+                <TextBig data-testid="chartLegendDimension-valuePlaceholder">{"\u00a0"}</TextBig>
+              )}
             </Flex>
           )}
         </Flex>

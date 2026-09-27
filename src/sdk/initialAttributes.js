@@ -126,6 +126,8 @@ export default {
   points: null,
   legend: true,
   legendWrap: false,
+  // Hidden dimensions keep an empty value line, so selecting one does not reflow the legend.
+  legendKeepValueRow: false,
   heatmapPalette: null,
   heatmapColorScale: null,
   heatmapLabelUnit: null,
