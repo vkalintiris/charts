@@ -72,7 +72,41 @@ const VirtualDimensions = ({ virtualizer, dimensionIds }) => (
   </Box>
 )
 
-const Legend = props => {
+// Every dimension rendered, wrapping into rows; the height cap keeps high-cardinality charts scrollable.
+const WrappedContainer = styled(Flex).attrs(props => ({
+  gap: 0.5,
+  padding: [0.5, 0, 1],
+  flex: true,
+  "data-testid": "chartLegend",
+  ...props,
+}))`
+  flex-wrap: wrap;
+  row-gap: 4px;
+  max-height: 112px;
+  overflow-y: auto;
+`
+
+const WrappedLegend = props => {
+  const dimensionIds = useDimensionIds()
+  const initialLoading = useInitialLoading()
+  const empty = useEmpty()
+
+  return (
+    <WrappedContainer {...props}>
+      {!initialLoading &&
+        !empty &&
+        dimensionIds?.map(id => (
+          <Flex key={id} alignItems="center" padding={[0, 0.5, 0, 0]}>
+            <Dimension id={id} />
+          </Flex>
+        ))}
+      {initialLoading && <SkeletonDimensions />}
+      {!initialLoading && empty && <EmptyDimension />}
+    </WrappedContainer>
+  )
+}
+
+const ScrollingLegend = props => {
   const dimensionIds = useDimensionIds()
   const chart = useChart()
   const initialLoading = useInitialLoading()
@@ -196,6 +230,12 @@ const Legend = props => {
       )}
     </Flex>
   )
+}
+
+const Legend = props => {
+  const legendWrap = useAttributeValue("legendWrap")
+
+  return legendWrap ? <WrappedLegend {...props} /> : <ScrollingLegend {...props} />
 }
 
 export default Legend

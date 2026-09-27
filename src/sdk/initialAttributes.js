@@ -124,6 +124,7 @@ export default {
   pixelsPerPoint: 3,
   points: null,
   legend: true,
+  legendWrap: false,
   groupingMethod: "average",
   groupingTime: 0,
   urlOptions: [],

@@ -25,6 +25,7 @@ const Footer = () => {
   const expandable = useAttributeValue("expandable")
   const expanded = useAttributeValue("expanded")
   const legend = useAttributeValue("legend")
+  const legendWrap = useAttributeValue("legendWrap")
 
   usePayload()
   const isHeatmap = useIsHeatmap()
@@ -36,7 +37,10 @@ const Footer = () => {
       {!showingInfo && legend && (
         <>
           {isHeatmap && <HeatmapColors />}
-          <Flex alignItems="center" height={isMinimal ? "20px" : "36px"}>
+          <Flex
+            alignItems={legendWrap ? "start" : "center"}
+            height={legendWrap ? { min: "36px" } : isMinimal ? "20px" : "36px"}
+          >
             {!isMinimal && !isHeatmap && <DimensionSort />}
             <Legend padding={isHeatmap ? [0, 2] : undefined} />
           </Flex>
