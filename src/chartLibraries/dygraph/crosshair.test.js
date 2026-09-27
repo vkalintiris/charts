@@ -73,6 +73,16 @@ describe("crosshair", () => {
       ])
     })
 
+    it("draws the outline dashed in heatmapHoverColor", () => {
+      heatmap({ heatmapHoverColor: "#F28E2B" })
+      const styles = []
+      mockCtx.strokeRect = jest.fn(() => styles.push(mockCtx.strokeStyle))
+      crosshair(mockChartUI, 1, "hover", "mid")
+
+      expect(styles).toEqual(["#F28E2B"])
+      expect(mockCtx.setLineDash).toHaveBeenLastCalledWith([3, 3])
+    })
+
     it("erases the previous outline before drawing the next, and when the hover ends", () => {
       heatmap()
       mockCtx.clearRect = jest.fn()

@@ -153,6 +153,7 @@ const Dimensions = () => {
             key={id}
             id={id}
             strong={row === id}
+            hoverColor={isHeatmap ? chart.getAttribute("heatmapHoverColor") : undefined}
             valueOnly={valueOnly}
             rowFlavour={rowFlavour}
           />

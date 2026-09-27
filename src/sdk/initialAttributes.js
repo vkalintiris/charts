@@ -134,6 +134,8 @@ export default {
   heatmapMarkedCell: null,
   // Outline the hovered heatmap cell next to the crosshair.
   heatmapHoverCell: false,
+  // Colour of the hovered cell's (dashed) outline and of the hovered row's bar in a heatmap popover.
+  heatmapHoverColor: null,
   // Heatmap popover: leave out rows whose value is 0.
   heatmapPopoverHideZeros: false,
   // Heatmap popover: only the dimension and value columns (no anomaly rate or annotations).

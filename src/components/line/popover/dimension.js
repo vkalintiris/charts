@@ -97,9 +97,19 @@ const AnnotationsValue = ({ children: annotations, showFull, ...rest }) => (
   </Flex>
 )
 
-const Dimension = ({ id, strong, valueOnly = false, rowFlavour }) => {
+const Dimension = ({ id, strong, hoverColor, valueOnly = false, rowFlavour }) => {
   const visible = useVisibleDimensionId(id)
   const isHeatmap = useIsHeatmap()
+  const name = (
+    <Name
+      padding={[1, 2]}
+      flex
+      id={id}
+      strong={strong}
+      noTooltip
+      color={strong ? "textFocus" : "text"}
+    />
+  )
 
   return (
     <GridRow opacity={visible ? null : "weak"}>
@@ -108,17 +118,17 @@ const Dimension = ({ id, strong, valueOnly = false, rowFlavour }) => {
           id={id}
           valueKey={rowValueKeys[rowFlavour] || rowValueKeys.default}
           height="18px"
+          highlightColor={strong ? hoverColor : undefined}
         >
           {!isHeatmap && <Color id={id} />}
         </ColorBackground>
-        <Name
-          padding={[1, 2]}
-          flex
-          id={id}
-          strong={strong}
-          noTooltip
-          color={strong ? "textFocus" : "text"}
-        />
+        {strong && hoverColor ? (
+          <Flex position="relative" flex overflow="hidden" data-testid="chartPopover-nameAboveBar">
+            {name}
+          </Flex>
+        ) : (
+          name
+        )}
       </DimensionNameCell>
       <ValueWithUnits
         id={id}

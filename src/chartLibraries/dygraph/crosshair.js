@@ -42,9 +42,10 @@ const outlineHoveredCell = (chartUI, dygraph, ctx, row, dimensionId) => {
   )
 
   ctx.save()
-  ctx.setLineDash([])
+  ctx.setLineDash([3, 3])
   ctx.lineWidth = 1.5
-  ctx.strokeStyle = chart.getThemeAttribute(themeAttrByFlavour.hover)
+  ctx.strokeStyle =
+    chart.getAttribute("heatmapHoverColor") || chart.getThemeAttribute(themeAttrByFlavour.hover)
   const rect = [x - width / 2, dygraph.toDomYCoord(index) - height / 2, width, height]
   ctx.strokeRect(...rect)
   ctx.restore()

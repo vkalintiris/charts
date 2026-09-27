@@ -86,6 +86,35 @@ describe("line popover Dimensions", () => {
     ])
   })
 
+  it("draws the hovered row's bar in heatmapHoverColor", async () => {
+    const ids = ["a", "b", "c"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapKeepEmptyRows: true,
+        heatmapHoverColor: "#F28E2B",
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 3]])
+    chart.updateAttribute("hoverX", [1000, "b"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    const bars = screen
+      .getAllByTestId("chartPopover-dimensionNameCell")
+      .map(cell => [cell.textContent, getComputedStyle(cell.firstElementChild).backgroundColor])
+    expect(bars.find(([name]) => name === "b")[1]).toBe("rgb(242, 142, 43)")
+    expect(bars.filter(([, bg]) => bg === "rgb(242, 142, 43)")).toHaveLength(1)
+
+    const above = screen.getByTestId("chartPopover-nameAboveBar")
+    expect(above).toHaveTextContent("b")
+    expect(getComputedStyle(above).position).toBe("relative")
+  })
+
   it("shows only the value column with heatmapPopoverValueOnly", async () => {
     const ids = ["a", "b"]
     const { chart } = makeTestChart({
