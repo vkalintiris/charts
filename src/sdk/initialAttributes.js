@@ -125,7 +125,6 @@ export default {
   points: null,
   legend: true,
   legendWrap: false,
-  heatmapMarkers: null,
   heatmapPalette: null,
   heatmapColorScale: null,
   heatmapLabelUnit: null,

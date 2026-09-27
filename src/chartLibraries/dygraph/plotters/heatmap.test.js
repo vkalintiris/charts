@@ -19,12 +19,6 @@ describe("heatmap plotter", () => {
       strokeStyle: "black",
       fillRect: jest.fn(),
       strokeRect: jest.fn(),
-      save: jest.fn(),
-      restore: jest.fn(),
-      beginPath: jest.fn(),
-      arc: jest.fn(),
-      fill: jest.fn(),
-      stroke: jest.fn(),
     }
 
     plotter = {
@@ -40,7 +34,6 @@ describe("heatmap plotter", () => {
           setNames: ["dim1", "dim2", "dim3"],
         },
         toDomYCoord: jest.fn(index => 50 + index * 20),
-        toDomXCoord: jest.fn(x => x / 1000),
       },
     }
 
@@ -194,61 +187,6 @@ describe("heatmap plotter", () => {
       100,
       expect.any(Number)
     )
-  })
-
-  it("draws no markers unless asked", () => {
-    heatmapPlotter(chartUI)(plotter)
-    expect(ctx.arc).not.toHaveBeenCalled()
-  })
-
-  it("draws a marker at each marked column and row, skipping unknown rows", () => {
-    chartUI.chart.getAttribute.mockImplementation(attr => {
-      if (attr === "max") return 100
-      if (attr === "heatmapMarkers")
-        return [
-          { x: 10_000, id: "dim3" },
-          { x: 20_000, id: "dim1" },
-          { x: 30_000, id: "missing" },
-        ]
-      return undefined
-    })
-
-    heatmapPlotter(chartUI)(plotter)
-
-    expect(ctx.arc.mock.calls.map(([x, y]) => [x, y])).toEqual([
-      [10, 90],
-      [20, 50],
-    ])
-  })
-
-  it("lays slotted markers side by side in the cell, colored with a white outline", () => {
-    chartUI.chart.getAttribute.mockImplementation(attr => {
-      if (attr === "max") return 100
-      if (attr === "heatmapMarkers")
-        return [
-          { x: 20_000, id: "dim1", color: "#0000ff", slot: 0, slots: 3 },
-          { x: 20_000, id: "dim1", color: "#ff0000", slot: 1, slots: 3 },
-          { x: 20_000, id: "dim2", color: "#00ff00", slot: 2, slots: 3 },
-        ]
-      return undefined
-    })
-    const fills = []
-    ctx.fill.mockImplementation(() => fills.push([ctx.fillStyle, ctx.strokeStyle, ctx.lineWidth]))
-
-    heatmapPlotter(chartUI)(plotter)
-
-    // bar width 10 (the column spacing), three places of 10/3 px each
-    const place = 10 / 3
-    expect(ctx.arc.mock.calls.map(([x, y, r]) => [x, y, r])).toEqual([
-      [20 - place, 50, place / 2 - 0.25],
-      [20, 50, place / 2 - 0.25],
-      [20 + place, 70, place / 2 - 0.25],
-    ])
-    expect(fills).toEqual([
-      ["#0000ff", "#ffffff", 0.5],
-      ["#ff0000", "#ffffff", 0.5],
-      ["#00ff00", "#ffffff", 0.5],
-    ])
   })
 
   it("leaves a gap between cells when asked, and none by default", () => {

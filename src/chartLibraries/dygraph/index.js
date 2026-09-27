@@ -225,7 +225,6 @@ export default (sdk, chart) => {
         })
       }),
       chart.onAttributeChange("timezone", () => updateOptions({})),
-      chart.onAttributeChange("heatmapMarkers", () => updateOptions({})),
     ].filter(Boolean)
 
     overlays.toggle()
