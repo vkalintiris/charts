@@ -13,7 +13,9 @@ const activeCursorByNavigation = {
 }
 
 export default css`
-  cursor: ${props => cursorByNavigation[props.navigation] || cursorByNavigation.default};
+  cursor: ${props =>
+    cursorByNavigation[props.navigation] ||
+    (props.$cellClick ? "pointer" : cursorByNavigation.default)};
 
   ${props => {
     const activeCursor = activeCursorByNavigation[props.navigation]

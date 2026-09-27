@@ -55,6 +55,7 @@ export const ContentWrapper = props => (
 export const Container = props => {
   const chartLibrary = useAttributeValue("chartLibrary")
   const navigation = useAttributeValue("navigation")
+  const cellClick = useAttributeValue("heatmapCellClick")
 
   return (
     <StyledContainer
@@ -66,6 +67,7 @@ export const Container = props => {
       width="100%"
       overflow="hidden"
       navigation={navigation}
+      $cellClick={cellClick}
       {...props}
     />
   )

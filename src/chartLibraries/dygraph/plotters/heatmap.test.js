@@ -54,6 +54,27 @@ describe("heatmap plotter", () => {
     })
   })
 
+  it("outlines the marked cell only", () => {
+    Object.assign(ctx, { save: jest.fn(), restore: jest.fn(), lineWidth: 1 })
+    plotter.allSeriesPoints = plotter.allSeriesPoints.map(points =>
+      points.map((point, i) => ({ ...point, xval: (i + 1) * 1000 }))
+    )
+    heatmapPlotter(chartUI)(plotter)
+    const unmarked = ctx.strokeRect.mock.calls.length
+
+    ctx.strokeRect.mockClear()
+    chartUI.chart.getAttribute.mockImplementation(attr => {
+      if (attr === "max") return 100
+      if (attr === "heatmapMarkedCell") return { x: 2000, id: "dim2" }
+      return undefined
+    })
+    heatmapPlotter(chartUI)(plotter)
+
+    expect(ctx.strokeRect).toHaveBeenCalledTimes(unmarked + 1)
+    expect(ctx.save).toHaveBeenCalledTimes(1)
+    expect(ctx.restore).toHaveBeenCalledTimes(1)
+  })
+
   it("returns early if no chartUI", () => {
     const plotterFunc = heatmapPlotter(null)
     expect(() => plotterFunc(plotter)).not.toThrow()

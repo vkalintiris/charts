@@ -21,6 +21,8 @@ export default chartUI => plotter => {
 
   const getColor = makeGetColor(chartUI.chart)
   const gap = chartUI.chart.getAttribute("heatmapCellGap") || 0
+  const marked = chartUI.chart.getAttribute("heatmapMarkedCell")
+  let markedRect = null
 
   series.forEach((seriesName, j) => {
     const index = chartUI.chart.getHeatmapYIndex(seriesName)
@@ -45,6 +47,18 @@ export default chartUI => plotter => {
 
       ctx.strokeStyle = "transparent"
       ctx.strokeRect(x, y, barWidth - gap, height - gap)
+
+      if (marked && seriesName === marked.id && p.xval === marked.x)
+        markedRect = [x, y, barWidth - gap, height - gap]
     })
   })
+
+  if (!markedRect) return
+
+  // Drawn after every cell so neighbouring cells do not paint over the outline.
+  ctx.save()
+  ctx.lineWidth = 2
+  ctx.strokeStyle = "#00AB44"
+  ctx.strokeRect(...markedRect)
+  ctx.restore()
 }

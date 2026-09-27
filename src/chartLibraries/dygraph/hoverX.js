@@ -129,7 +129,16 @@ export default chartUI => {
     chartUI.chart.trigger("annotationCreate", x / 1000)
   }
 
+  const clickCell = (event, x) => {
+    const { dimensionId } = findClosest(event, [])
+    if (!dimensionId) return
+    chartUI.sdk.trigger("heatmapCellClick", chartUI.chart, x, dimensionId)
+  }
+
   const click = (event, x, points) => {
+    // An opted-in heatmap reports the clicked cell and takes no chart click (no click line, no annotation).
+    if (isHeatmap(chartUI.chart) && chartUI.chart.getAttribute("heatmapCellClick"))
+      return clickCell(event, x)
     if (chartUI.chart.getAttribute("enabledClick") === false) return
     if (lastTimestamp === x) return
 

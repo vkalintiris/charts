@@ -128,6 +128,10 @@ export default {
   legendWrap: false,
   // Hidden dimensions keep an empty value line, so selecting one does not reflow the legend.
   legendKeepValueRow: false,
+  // A heatmap click reports its cell (heatmapCellClick event) instead of a chart click.
+  heatmapCellClick: false,
+  // { x: ms, id: dimensionId }: the heatmap cell drawn with an outline.
+  heatmapMarkedCell: null,
   heatmapPalette: null,
   heatmapColorScale: null,
   heatmapLabelUnit: null,
