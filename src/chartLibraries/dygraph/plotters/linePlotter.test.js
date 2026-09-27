@@ -5,13 +5,31 @@ const makeContext = () => {
   const calls = []
   const drawingContext = {}
 
-  ;["beginPath", "moveTo", "bezierCurveTo", "stroke"].forEach(method => {
+  ;["beginPath", "moveTo", "bezierCurveTo", "stroke", "save", "restore"].forEach(method => {
     drawingContext[method] = (...args) => calls.push([method, ...args])
   })
 
   return { calls, drawingContext }
 }
 
+const makeDygraph = calls => ({
+  getOption: name =>
+    name === "drawPointCallback"
+      ? (g, setName, ctx, x, y, color, radius) => calls.push(["point", x, y, color, radius])
+      : undefined,
+  getNumericOption: name => (name === "pointSize" ? 1 : undefined),
+})
+
+const plot = (points, context) =>
+  linePlotter()({
+    dygraph: makeDygraph(context.calls),
+    setName: "p99",
+    color: "#123456",
+    drawingContext: context.drawingContext,
+    points,
+  })
+
+// The curve matches Dygraph's smooth plotter call for call; isolated points are drawn after it.
 const expectSameDrawing = (points, smoothing) => {
   const previousSmoothing = Dygraph.smoothPlotter.smoothing
   const reference = makeContext()
@@ -20,12 +38,15 @@ const expectSameDrawing = (points, smoothing) => {
   try {
     Dygraph.smoothPlotter.smoothing = smoothing
     Dygraph.smoothPlotter({ drawingContext: reference.drawingContext, points })
-    linePlotter()({ drawingContext: candidate.drawingContext, points })
+    plot(points, candidate)
   } finally {
     Dygraph.smoothPlotter.smoothing = previousSmoothing
   }
 
-  expect(candidate.calls).toEqual(reference.calls)
+  expect(candidate.calls.slice(0, reference.calls.length)).toEqual(reference.calls)
+  candidate.calls
+    .slice(reference.calls.length)
+    .forEach(([method]) => expect(["save", "point", "restore"]).toContain(method))
 }
 
 describe("linePlotter", () => {
@@ -78,4 +99,40 @@ describe("linePlotter", () => {
       expectSameDrawing(points, smoothing)
     }
   )
+
+  it("draws a point for each value with no valid neighbour", () => {
+    const context = makeContext()
+    plot(
+      [
+        { canvasx: 10, canvasy: 40 },
+        { canvasx: 20, canvasy: null },
+        { canvasx: 30, canvasy: 20 },
+        { canvasx: 40, canvasy: NaN },
+        { canvasx: 50, canvasy: 30 },
+        { canvasx: 60, canvasy: 35 },
+      ],
+      context
+    )
+
+    expect(context.calls.filter(([method]) => method === "point")).toEqual([
+      ["point", 10, 40, "#123456", 1],
+      ["point", 30, 20, "#123456", 1],
+    ])
+  })
+
+  it("draws no points when every value has a neighbour", () => {
+    const context = makeContext()
+    plot(
+      [
+        { canvasx: 10, canvasy: 40 },
+        { canvasx: 20, canvasy: 10 },
+        { canvasx: 30, canvasy: null },
+        { canvasx: 40, canvasy: 20 },
+        { canvasx: 50, canvasy: 30 },
+      ],
+      context
+    )
+
+    expect(context.calls.filter(([method]) => method === "point")).toEqual([])
+  })
 })

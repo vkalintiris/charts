@@ -1,9 +1,44 @@
 import Dygraph from "dygraphs/src/dygraph"
 import "dygraphs/src/extras/smooth-plotter"
+import { Circles } from "dygraphs/src/dygraph-utils"
 
 const isValidPoint = point => point && point.canvasy && !isNaN(point.canvasy)
 
-const smoothLinePlotter = ({ drawingContext, points }) => {
+// A value with no valid neighbour gets no curve segment, so it is drawn as a point, as Dygraph's
+// own line plotter does; otherwise a lone value between gaps would not show at all.
+const drawIsolatedPoints = ({ dygraph, setName, drawingContext, points, color }) => {
+  let drawPoint = null
+  let pointSize
+
+  for (let index = 0; index < points.length; index++) {
+    const point = points[index]
+    if (!isValidPoint(point)) continue
+    if (isValidPoint(points[index - 1]) || isValidPoint(points[index + 1])) continue
+
+    if (!drawPoint) {
+      drawPoint = dygraph.getOption("drawPointCallback", setName) || Circles.DEFAULT
+      pointSize = dygraph.getNumericOption("pointSize", setName)
+    }
+
+    drawingContext.save()
+    drawPoint.call(
+      dygraph,
+      dygraph,
+      setName,
+      drawingContext,
+      point.canvasx,
+      point.canvasy,
+      color,
+      pointSize,
+      point.idx
+    )
+    drawingContext.restore()
+  }
+}
+
+const smoothLinePlotter = e => {
+  const { drawingContext, points } = e
+
   drawingContext.beginPath()
   drawingContext.moveTo(points[0].canvasx, points[0].canvasy)
 
@@ -83,6 +118,7 @@ const smoothLinePlotter = ({ drawingContext, points }) => {
   }
 
   drawingContext.stroke()
+  drawIsolatedPoints(e)
 }
 
 export default () => smoothLinePlotter
