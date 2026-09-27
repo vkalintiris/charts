@@ -64,6 +64,7 @@ describe("move plugin", () => {
     expect(mockNode.updateAttributes).toHaveBeenCalledWith({
       after: -300,
       before: 0,
+      liveAnchor: 2000000,
     })
   })
 
@@ -76,6 +77,7 @@ describe("move plugin", () => {
     expect(mockNode.updateAttributes).toHaveBeenCalledWith({
       after: -1999,
       before: 0,
+      liveAnchor: 2000000,
     })
   })
 
@@ -111,5 +113,26 @@ describe("move plugin", () => {
     sdk.trigger("moveX", chart, 1000, 2000)
 
     expect(mockNode.updateAttribute).toHaveBeenCalledWith("loaded", false)
+  })
+})
+
+describe("move plugin, a move to a relative window", () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it("anchors the window at the move, not at an earlier fixed window's end", () => {
+    const { sdk, chart } = makeTestChart({ attributes: { autoPlay: true } })
+    movePlugin(sdk)
+
+    // A fixed window 16:22-16:23 was fetched: its end is the chart's anchor.
+    chart.updateAttributes({ after: 1_000_000, before: 1_000_060, liveAnchor: 1_000_060_000 })
+
+    // 14 minutes later a zoom reaches past now, so the move turns relative (the last 719 s).
+    jest.spyOn(Date, "now").mockReturnValue(1_000_900_000)
+    sdk.trigger("moveX", chart, 1_000_900 - 600, 1_000_900 + 120)
+
+    expect(chart.getAttribute("after")).toBe(-719)
+    expect(chart.getDateWindow()).toEqual([1_000_900_000 - 719_000, 1_000_900_000])
   })
 })

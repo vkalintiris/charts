@@ -16,8 +16,12 @@ export default sdk => {
       const autoPlay = chart.getAttribute("autoPlay")
       const move = getMoveX(after, before, autoPlay)
 
+      // A relative window is drawn back from `liveAnchor`; one left by an earlier fixed window would pin it there,
+      // stuck in the past while paused. Anchor it at the move; the next live fetch advances it.
+      const anchored = move.after < 0 ? { ...move, liveAnchor: Date.now() } : move
+
       chart.getApplicableNodes({ syncPanning: true }).forEach(node => {
-        node.updateAttributes(move)
+        node.updateAttributes(anchored)
 
         if (!node.getAttribute("active")) node.updateAttribute("loaded", false)
       })
