@@ -156,4 +156,12 @@ describe("heatmapTicker", () => {
       heatmapTicker(0, 100, 200, mockOpts, mockDygraph, null, { labels: [] })
     }).not.toThrow()
   })
+
+  it("puts each row's label on the row's top edge", () => {
+    const ticks = heatmapTicker(0, 100, 1000, mockOpts, mockDygraph, null, {
+      labels: ["a_1", "a_2", "a_+Inf"],
+    })
+
+    expect(ticks.filter(tick => tick.v !== undefined).map(tick => tick.v)).toEqual([0.5, 1.5, 2.5])
+  })
 })

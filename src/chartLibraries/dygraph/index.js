@@ -451,7 +451,8 @@ export default (sdk, chart) => {
       valueRange: staticValueRange
         ? staticValueRange
         : isHeatmap(chartType)
-          ? [0, heatmapIds.length]
+          ? // rows are drawn centered on 0 .. n - 1, so each spans index ± 0.5
+            [-0.5, heatmapIds.length - 0.5]
           : getValueRange(chart, { dygraph: true }),
     }
   }

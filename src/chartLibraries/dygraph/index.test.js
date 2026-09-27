@@ -396,7 +396,7 @@ describe("dygraphChart", () => {
     const Dygraph = require("dygraphs")
     const options = Dygraph.mock.calls[Dygraph.mock.calls.length - 1][2]
 
-    expect(options.valueRange).toEqual([0, 5])
+    expect(options.valueRange).toEqual([-0.5, 4.5])
   })
 
   it("returns axis range from dygraph", () => {

@@ -20,8 +20,9 @@ export default (
   const formatLabel = opts("axisLabelFormatter")
 
   const hiddenStep = Math.ceil(defaultLabels.length / (maxTicks - 1))
+  // A row's label is its upper bound, so it sits on the row's top edge.
   const ticks = labels.map((l, i) => ({
-    v: i,
+    v: i + 0.5,
     label: i % hiddenStep === 0 ? formatLabel(labels[i], 0, opts, dygraph) : null,
   }))
 
