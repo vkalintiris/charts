@@ -57,19 +57,6 @@ describe("selectVertical plugin", () => {
     expect(chart.moveY).toHaveBeenCalledWith(10, 100)
   })
 
-  it("leaves the y axis alone when selectVerticalZoom is false", () => {
-    chart.updateAttribute("selectVerticalZoom", false)
-    selectVerticalPlugin(sdk)
-
-    sdk.trigger("highlightVerticalEnd", chart, [10, 100])
-
-    expect(mockNode.updateAttributes).toHaveBeenCalledWith({
-      enabledHover: true,
-      highlighting: false,
-    })
-    expect(chart.moveY).not.toHaveBeenCalled()
-  })
-
   it("handles highlightVerticalEnd with null value range", () => {
     selectVerticalPlugin(sdk)
 

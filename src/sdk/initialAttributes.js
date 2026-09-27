@@ -128,8 +128,6 @@ export default {
   legendWrap: false,
   // Hidden dimensions keep an empty value line, so selecting one does not reflow the legend.
   legendKeepValueRow: false,
-  // A vertical selection zooms the y axis; false leaves it to highlightVerticalEnd listeners.
-  selectVerticalZoom: true,
   heatmapPalette: null,
   heatmapColorScale: null,
   heatmapLabelUnit: null,
