@@ -233,21 +233,21 @@ describe("heatmap plotter", () => {
       return undefined
     })
     const fills = []
-    ctx.fill.mockImplementation(() => fills.push([ctx.fillStyle, ctx.strokeStyle]))
+    ctx.fill.mockImplementation(() => fills.push([ctx.fillStyle, ctx.strokeStyle, ctx.lineWidth]))
 
     heatmapPlotter(chartUI)(plotter)
 
     // bar width 10 (the column spacing), three places of 10/3 px each
     const place = 10 / 3
     expect(ctx.arc.mock.calls.map(([x, y, r]) => [x, y, r])).toEqual([
-      [20 - place, 50, 1.25],
-      [20, 50, 1.25],
-      [20 + place, 70, 1.25],
+      [20 - place, 50, place / 2 - 0.25],
+      [20, 50, place / 2 - 0.25],
+      [20 + place, 70, place / 2 - 0.25],
     ])
     expect(fills).toEqual([
-      ["#0000ff", "#ffffff"],
-      ["#ff0000", "#ffffff"],
-      ["#00ff00", "#ffffff"],
+      ["#0000ff", "#ffffff", 0.5],
+      ["#ff0000", "#ffffff", 0.5],
+      ["#00ff00", "#ffffff", 0.5],
     ])
   })
 })

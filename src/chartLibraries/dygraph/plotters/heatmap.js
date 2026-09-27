@@ -53,13 +53,12 @@ const MIN_MARKER_RADIUS = 1.25
 // Opt-in points drawn over the cells, e.g. percentiles per column:
 // [{ x: ms, id: dimensionId, color?, slot?, slots? }]. A marker with `slots` takes the `slot`-th of that many
 // equal places across its cell, sized to fit; a colored marker gets a white outline, an uncolored one is white
-// with a dark outline.
+// with a dark outline. Colored markers get a thin outline so that small ones keep their color.
 const drawMarkers = (chart, g, ctx, barWidth) => {
   const markers = chart.getAttribute("heatmapMarkers")
   if (!Array.isArray(markers) || !markers.length) return
 
   ctx.save()
-  ctx.lineWidth = 1
   markers.forEach(({ x, id, color, slot = 0, slots = 1 }) => {
     const index = chart.getHeatmapYIndex(id)
     if (index === -1) return
@@ -67,12 +66,13 @@ const drawMarkers = (chart, g, ctx, barWidth) => {
     const place = barWidth / slots
     const radius =
       slots > 1
-        ? Math.max(MIN_MARKER_RADIUS, Math.min(MARKER_RADIUS, place / 2 - 0.5))
+        ? Math.max(MIN_MARKER_RADIUS, Math.min(MARKER_RADIUS, place / 2 - 0.25))
         : MARKER_RADIUS
     const cx = g.toDomXCoord(x) + (slot - (slots - 1) / 2) * place
 
     ctx.fillStyle = color || "#ffffff"
     ctx.strokeStyle = color ? "#ffffff" : "#000000"
+    ctx.lineWidth = color ? 0.5 : 1
     ctx.beginPath()
     ctx.arc(cx, g.toDomYCoord(index), radius, 0, 2 * Math.PI)
     ctx.fill()
