@@ -220,4 +220,34 @@ describe("heatmap plotter", () => {
       [20, 50],
     ])
   })
+
+  it("lays slotted markers side by side in the cell, colored with a white outline", () => {
+    chartUI.chart.getAttribute.mockImplementation(attr => {
+      if (attr === "max") return 100
+      if (attr === "heatmapMarkers")
+        return [
+          { x: 20_000, id: "dim1", color: "#0000ff", slot: 0, slots: 3 },
+          { x: 20_000, id: "dim1", color: "#ff0000", slot: 1, slots: 3 },
+          { x: 20_000, id: "dim2", color: "#00ff00", slot: 2, slots: 3 },
+        ]
+      return undefined
+    })
+    const fills = []
+    ctx.fill.mockImplementation(() => fills.push([ctx.fillStyle, ctx.strokeStyle]))
+
+    heatmapPlotter(chartUI)(plotter)
+
+    // bar width 10 (the column spacing), three places of 10/3 px each
+    const place = 10 / 3
+    expect(ctx.arc.mock.calls.map(([x, y, r]) => [x, y, r])).toEqual([
+      [20 - place, 50, 1.25],
+      [20, 50, 1.25],
+      [20 + place, 70, 1.25],
+    ])
+    expect(fills).toEqual([
+      ["#0000ff", "#ffffff"],
+      ["#ff0000", "#ffffff"],
+      ["#00ff00", "#ffffff"],
+    ])
+  })
 })
