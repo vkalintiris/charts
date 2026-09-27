@@ -17,10 +17,19 @@ const LinearColorScaleBar = styled(Flex).attrs({ width: "320px", height: "12px",
   );
 `
 
+const PaletteScaleBar = styled(Flex).attrs({ width: "320px", height: "12px", round: true })`
+  background: ${({ stops }) => `linear-gradient(to right, ${stops})`};
+`
+
 const HeatmapColorsLegend = () => {
   const chart = useChart()
   const max = useAttributeValue("max")
   const units = useUnitSign()
+  const palette = useAttributeValue("heatmapPalette")
+  const log = useAttributeValue("heatmapColorScale") === "log"
+  const stops = Array.isArray(palette)
+    ? palette.map(([r, g, b]) => `rgb(${r}, ${g}, ${b})`).join(", ")
+    : null
 
   useAttributeValue("theme") // rerender on theme change
 
@@ -29,10 +38,8 @@ const HeatmapColorsLegend = () => {
       <TextNano>
         {chart.getConvertedValue(0)} {units}
       </TextNano>
-      <LinearColorScaleBar />
-      <TextNano>
-        {chart.getConvertedValue(max)} {units}
-      </TextNano>
+      {stops ? <PaletteScaleBar stops={stops} /> : <LinearColorScaleBar />}
+      <TextNano>{`${chart.getConvertedValue(max)} ${units}${log ? " (log scale)" : ""}`}</TextNano>
     </Flex>
   )
 }

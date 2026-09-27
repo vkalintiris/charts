@@ -20,6 +20,7 @@ export default chartUI => plotter => {
   const barWidth = Math.floor(minWidthSep)
 
   const getColor = makeGetColor(chartUI.chart)
+  const gap = chartUI.chart.getAttribute("heatmapCellGap") || 0
 
   series.forEach((seriesName, j) => {
     const index = chartUI.chart.getHeatmapYIndex(seriesName)
@@ -36,11 +37,14 @@ export default chartUI => plotter => {
       const rowIndex = Number.isInteger(p.idx) ? p.idx : i
       const value = chartUI.chart.getDimensionValue(seriesName, rowIndex, { allowNull: true })
 
+      const x = p.canvasx - barWidth / 2 + gap / 2
+      const y = g.toDomYCoord(index) - height / 2 + gap / 2
+
       ctx.fillStyle = getColor(value)
-      ctx.fillRect(p.canvasx - barWidth / 2, g.toDomYCoord(index) - height / 2, barWidth, height)
+      ctx.fillRect(x, y, barWidth - gap, height - gap)
 
       ctx.strokeStyle = "transparent"
-      ctx.strokeRect(p.canvasx - barWidth / 2, g.toDomYCoord(index) - height / 2, barWidth, height)
+      ctx.strokeRect(x, y, barWidth - gap, height - gap)
     })
   })
 

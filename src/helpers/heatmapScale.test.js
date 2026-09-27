@@ -1,4 +1,5 @@
 import {
+  formatDurationSeconds,
   detectHeatmapScale,
   formatHeatmapLabel,
   formatScaledValue,
@@ -186,6 +187,26 @@ describe("heatmapScale", () => {
     it("passes through fallback labels", () => {
       expect(formatHeatmapLabel("5ms", "num")).toBe("5ms")
       expect(formatHeatmapLabel("0.005", null)).toBe("0.005")
+    })
+  })
+
+  describe("duration labels (heatmapLabelUnit: seconds)", () => {
+    it.each([
+      [0.0000655, "65.5 µs"],
+      [0.004194304, "4.19 ms"],
+      [2.147483648, "2.15 s"],
+      [1099.511627776, "18.3 min"],
+      [0, "0"],
+    ])("formats %s seconds as %s", (seconds, label) => {
+      expect(formatDurationSeconds(seconds)).toBe(label)
+    })
+
+    it("formats numeric labels only when asked, and keeps +Inf", () => {
+      expect(formatHeatmapLabel("0.004194304", "num", "seconds")).toBe("4.19 ms")
+      expect(formatHeatmapLabel("+Inf", "num", "seconds")).toBe("+Inf")
+      expect(formatHeatmapLabel("0.004194304", "num")).toBe(
+        formatHeatmapLabel("0.004194304", "num")
+      )
     })
   })
 })

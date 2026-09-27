@@ -369,6 +369,7 @@ export default (sdk, chart) => {
       ? makeYTicker({
           labels: chart.getVisibleHeatmapIds?.() || chart.getVisibleDimensionIds(),
           scale: chart.getHeatmapScale?.(),
+          labelUnit: chart.getAttribute("heatmapLabelUnit"),
           secondsAsTime: chart.getAttribute("secondsAsTime"),
           units: chart.getVisibleDimensionIds().map(id => chart.getDimensionUnit(id)),
         })

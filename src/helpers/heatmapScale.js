@@ -20,21 +20,22 @@ export const parseHeatmapValue = value => {
   return parseFloat(label)
 }
 
-export const isHeatmapNumeric = values =>
-  values.every(value => !isNaN(parseHeatmapValue(value)))
+export const isHeatmapNumeric = values => values.every(value => !isNaN(parseHeatmapValue(value)))
 
 export const isHeatmapBinary = values => {
   let hasBinaryCandidate = false
 
-  return values.every(value => {
-    const parsed = parseHeatmapValue(value)
+  return (
+    values.every(value => {
+      const parsed = parseHeatmapValue(value)
 
-    if (!isFinite(parsed) || parsed <= 1) return true
+      if (!isFinite(parsed) || parsed <= 1) return true
 
-    hasBinaryCandidate = true
+      hasBinaryCandidate = true
 
-    return Number.isInteger(parsed) && parsed > 0 && Number.isInteger(Math.log2(parsed))
-  }) && hasBinaryCandidate
+      return Number.isInteger(parsed) && parsed > 0 && Number.isInteger(Math.log2(parsed))
+    }) && hasBinaryCandidate
+  )
 }
 
 export const detectHeatmapScale = values => {
@@ -82,11 +83,32 @@ export const formatScaledValue = (value, scale) => {
   return `${formatNumber(value / entry.divider)}${entry.prefix}`
 }
 
-export const formatHeatmapLabel = (value, scale) => {
+const DURATION_STEPS = [
+  [60, "min"],
+  [1, "s"],
+  [1e-3, "ms"],
+  [1e-6, "µs"],
+  [1e-9, "ns"],
+]
+
+export const formatDurationSeconds = seconds => {
+  if (!seconds) return "0"
+  const [divider, unit] =
+    DURATION_STEPS.find(([step]) => Math.abs(seconds) >= step) ||
+    DURATION_STEPS[DURATION_STEPS.length - 1]
+  return `${parseFloat((seconds / divider).toPrecision(3))} ${unit}`
+}
+
+// `unit: "seconds"` (opt-in, the chart's `heatmapLabelUnit`) formats numeric labels as durations.
+export const formatHeatmapLabel = (value, scale, unit) => {
   const label = getHeatmapValueLabel(value)
 
   if (typeof label !== "string") return value
   if (heatmapInfRegex.test(label)) return "+Inf"
+  if (unit === "seconds") {
+    const seconds = parseHeatmapValue(label)
+    if (!isNaN(seconds)) return formatDurationSeconds(seconds)
+  }
   if (!scale) return label
 
   const parsed = parseHeatmapValue(label)

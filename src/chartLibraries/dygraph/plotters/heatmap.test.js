@@ -250,4 +250,19 @@ describe("heatmap plotter", () => {
       ["#00ff00", "#ffffff", 0.5],
     ])
   })
+
+  it("leaves a gap between cells when asked, and none by default", () => {
+    heatmapPlotter(chartUI)(plotter)
+    const [x, y, w, h] = ctx.fillRect.mock.calls[0]
+
+    ctx.fillRect.mockClear()
+    chartUI.chart.getAttribute.mockImplementation(attr => {
+      if (attr === "max") return 100
+      if (attr === "heatmapCellGap") return 2
+      return undefined
+    })
+    heatmapPlotter(chartUI)(plotter)
+
+    expect(ctx.fillRect.mock.calls[0]).toEqual([x + 1, y + 1, w - 2, h - 2])
+  })
 })

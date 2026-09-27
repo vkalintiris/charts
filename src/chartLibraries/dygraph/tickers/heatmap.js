@@ -1,8 +1,18 @@
 import { withoutPrefix } from "@/helpers/heatmap"
 import { formatHeatmapLabel } from "@/helpers/heatmapScale"
 
-export default (a, b, pixels, opts, dygraph, vals, { labels: defaultLabels = [], scale } = {}) => {
-  const labels = defaultLabels.map(label => formatHeatmapLabel(withoutPrefix(label), scale))
+export default (
+  a,
+  b,
+  pixels,
+  opts,
+  dygraph,
+  vals,
+  { labels: defaultLabels = [], scale, labelUnit } = {}
+) => {
+  const labels = defaultLabels.map(label =>
+    formatHeatmapLabel(withoutPrefix(label), scale, labelUnit)
+  )
 
   const pixelsPerTick = opts("pixelsPerLabel")
   const maxTicks = Math.floor(pixels / pixelsPerTick)

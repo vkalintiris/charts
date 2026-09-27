@@ -105,6 +105,37 @@ describe("heatmap utilities", () => {
     })
   })
 
+  describe("makeGetColor with the opt-in palette and log scale", () => {
+    const palette = [
+      [0, 0, 0],
+      [100, 100, 100],
+      [200, 200, 200],
+    ]
+    const chartWith = attributes => ({ getAttribute: name => attributes[name] })
+
+    it("maps counts onto the given palette linearly", () => {
+      const getColor = makeGetColor(chartWith({ max: 100, heatmapPalette: palette }))
+      expect(getColor(100)).toBe("rgb(200, 200, 200)")
+      expect(getColor(50)).toBe("rgb(100, 100, 100)")
+      expect(getColor(0)).toBe("transparent")
+    })
+
+    it("places counts by their logarithm with the log scale", () => {
+      const getColor = makeGetColor(
+        chartWith({ max: 9999, heatmapPalette: palette, heatmapColorScale: "log" })
+      )
+      // log10(100) / log10(10000) = 0.5: the middle of the palette
+      expect(getColor(99)).toBe("rgb(100, 100, 100)")
+      expect(getColor(9999)).toBe("rgb(200, 200, 200)")
+    })
+
+    it("keeps the default colors without the opt-in attributes", () => {
+      const plain = makeGetColor(chartWith({ max: 800 }))
+      const legacy = makeGetColor({ getAttribute: () => 800 })
+      expect([10, 400, 800].map(plain)).toEqual([10, 400, 800].map(legacy))
+    })
+  })
+
   describe("makeGetColor", () => {
     let mockChart
 

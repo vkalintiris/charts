@@ -32,8 +32,40 @@ const getColors = opacity => [
   `rgba(253, 231, 37, ${opacity})`,
 ]
 
+const paletteColors = (palette, opacity) =>
+  palette.map(([r, g, b]) => `rgba(${r}, ${g}, ${b}, ${opacity})`)
+
+// Opt-in: `heatmapPalette` ([[r, g, b], ...], low to high) and `heatmapColorScale: "log"`; without them the
+// default palette and linear scale below apply unchanged.
+const makeGetScaledColor = (chart, opacity, max) => {
+  const palette = chart.getAttribute("heatmapPalette")
+  const colors =
+    Array.isArray(palette) && palette.length > 1
+      ? paletteColors(palette, opacity)
+      : getColors(opacity)
+  const log = chart.getAttribute("heatmapColorScale") === "log"
+
+  if (!Number.isFinite(max) || max <= 0) {
+    return value => (value == null || value === 0 ? "transparent" : colors[0])
+  }
+
+  const position = log ? value => Math.log10(value + 1) / Math.log10(max + 1) : value => value / max
+  const getColor = scaleLinear()
+    .domain(colors.map((_, i) => i / (colors.length - 1)))
+    .range(colors)
+    .clamp(true)
+
+  return value => (value == null || value === 0 ? "transparent" : getColor(position(value)))
+}
+
+export const isScaledHeatmap = chart =>
+  Array.isArray(chart.getAttribute("heatmapPalette")) ||
+  chart.getAttribute("heatmapColorScale") === "log"
+
 export const makeGetColor = (chart, opacity = 1) => {
   const max = Number(chart.getAttribute("max"))
+  if (isScaledHeatmap(chart)) return makeGetScaledColor(chart, opacity, max)
+
   const colors = getColors(opacity)
 
   if (!Number.isFinite(max) || max <= 0) {

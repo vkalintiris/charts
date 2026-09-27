@@ -355,7 +355,12 @@ export default (chart, sdk) => {
 
     if (!isNaN(partIndex)) dimName = dimName.split(",")?.[partIndex] ?? dimName
 
-    if (isHeatmap(chart)) return formatHeatmapLabel(withoutPrefix(dimName), heatmapScale)
+    if (isHeatmap(chart))
+      return formatHeatmapLabel(
+        withoutPrefix(dimName),
+        heatmapScale,
+        chart.getAttribute("heatmapLabelUnit")
+      )
 
     return dimName
   }
