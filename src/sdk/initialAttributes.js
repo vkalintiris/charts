@@ -125,6 +125,7 @@ export default {
   points: null,
   legend: true,
   legendWrap: false,
+  heatmapMarkers: null,
   groupingMethod: "average",
   groupingTime: 0,
   urlOptions: [],

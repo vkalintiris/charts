@@ -43,4 +43,27 @@ export default chartUI => plotter => {
       ctx.strokeRect(p.canvasx - barWidth / 2, g.toDomYCoord(index) - height / 2, barWidth, height)
     })
   })
+
+  drawMarkers(chartUI.chart, g, ctx)
+}
+
+// Opt-in points drawn over the cells, e.g. a percentile per column: [{ x: ms, id: dimensionId }].
+const drawMarkers = (chart, g, ctx) => {
+  const markers = chart.getAttribute("heatmapMarkers")
+  if (!Array.isArray(markers) || !markers.length) return
+
+  ctx.save()
+  ctx.fillStyle = "#ffffff"
+  ctx.strokeStyle = "#000000"
+  ctx.lineWidth = 1
+  markers.forEach(({ x, id }) => {
+    const index = chart.getHeatmapYIndex(id)
+    if (index === -1) return
+
+    ctx.beginPath()
+    ctx.arc(g.toDomXCoord(x), g.toDomYCoord(index), 3, 0, 2 * Math.PI)
+    ctx.fill()
+    ctx.stroke()
+  })
+  ctx.restore()
 }

@@ -19,6 +19,12 @@ describe("heatmap plotter", () => {
       strokeStyle: "black",
       fillRect: jest.fn(),
       strokeRect: jest.fn(),
+      save: jest.fn(),
+      restore: jest.fn(),
+      beginPath: jest.fn(),
+      arc: jest.fn(),
+      fill: jest.fn(),
+      stroke: jest.fn(),
     }
 
     plotter = {
@@ -34,6 +40,7 @@ describe("heatmap plotter", () => {
           setNames: ["dim1", "dim2", "dim3"],
         },
         toDomYCoord: jest.fn(index => 50 + index * 20),
+        toDomXCoord: jest.fn(x => x / 1000),
       },
     }
 
@@ -105,11 +112,11 @@ describe("heatmap plotter", () => {
     plotter.dygraph.toDomYCoord = jest.fn(index => 50 + index * 20)
 
     chartUI.chart.getHeatmapYIndex.mockImplementation(id => {
-      const indexes = { "0.3": 0, 2: 1, "+Inf": 2 }
+      const indexes = { 0.3: 0, 2: 1, "+Inf": 2 }
       return indexes[id] ?? -1
     })
     chartUI.chart.getDimensionValue.mockImplementation(id => {
-      const values = { "0.3": 1, 2: 2, "+Inf": 3 }
+      const values = { 0.3: 1, 2: 2, "+Inf": 3 }
       return values[id]
     })
 
@@ -187,5 +194,30 @@ describe("heatmap plotter", () => {
       100,
       expect.any(Number)
     )
+  })
+
+  it("draws no markers unless asked", () => {
+    heatmapPlotter(chartUI)(plotter)
+    expect(ctx.arc).not.toHaveBeenCalled()
+  })
+
+  it("draws a marker at each marked column and row, skipping unknown rows", () => {
+    chartUI.chart.getAttribute.mockImplementation(attr => {
+      if (attr === "max") return 100
+      if (attr === "heatmapMarkers")
+        return [
+          { x: 10_000, id: "dim3" },
+          { x: 20_000, id: "dim1" },
+          { x: 30_000, id: "missing" },
+        ]
+      return undefined
+    })
+
+    heatmapPlotter(chartUI)(plotter)
+
+    expect(ctx.arc.mock.calls.map(([x, y]) => [x, y])).toEqual([
+      [10, 90],
+      [20, 50],
+    ])
   })
 })
