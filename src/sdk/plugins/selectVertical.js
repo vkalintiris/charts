@@ -17,7 +17,8 @@ export default sdk => {
       })
     })
 
-    if (valueRange === null) return
+    // A chart that uses the range itself (for example as a filter) opts out of the y-axis zoom.
+    if (valueRange === null || chart.getAttribute("selectVerticalZoom") === false) return
 
     const [min, max] = valueRange
     chart.moveY(min, max)
