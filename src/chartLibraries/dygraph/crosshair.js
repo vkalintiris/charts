@@ -12,6 +12,18 @@ const lineDashByFlavour = {
 
 import { isHeatmap } from "@/helpers/heatmap"
 
+// Dygraph only clears a thin strip around the previous crosshair, so the outline erases itself.
+const outlines = new WeakMap()
+
+export const clearHoveredCell = chartUI => {
+  const rect = outlines.get(chartUI)
+  if (!rect) return
+
+  outlines.delete(chartUI)
+  const [x, y, width, height] = rect
+  chartUI.getDygraph().canvas_ctx_.clearRect(x - 2, y - 2, width + 4, height + 4)
+}
+
 const outlineHoveredCell = (chartUI, dygraph, ctx, row, dimensionId) => {
   const { chart } = chartUI
   const index = chart.getHeatmapYIndex(dimensionId)
@@ -33,8 +45,10 @@ const outlineHoveredCell = (chartUI, dygraph, ctx, row, dimensionId) => {
   ctx.setLineDash([])
   ctx.lineWidth = 1.5
   ctx.strokeStyle = chart.getThemeAttribute(themeAttrByFlavour.hover)
-  ctx.strokeRect(x - width / 2, dygraph.toDomYCoord(index) - height / 2, width, height)
+  const rect = [x - width / 2, dygraph.toDomYCoord(index) - height / 2, width, height]
+  ctx.strokeRect(...rect)
   ctx.restore()
+  outlines.set(chartUI, rect)
 }
 
 export default (chartUI, row, flavour = "hover", dimensionId) => {
@@ -49,6 +63,7 @@ export default (chartUI, row, flavour = "hover", dimensionId) => {
 
   const x = dygraph.toDomXCoord(rowData[0])
 
+  clearHoveredCell(chartUI)
   dygraph.setSelection(row)
 
   ctx.save()

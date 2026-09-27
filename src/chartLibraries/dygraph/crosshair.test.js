@@ -1,4 +1,4 @@
-import crosshair from "./crosshair"
+import crosshair, { clearHoveredCell } from "./crosshair"
 import { makeTestChart } from "@jest/testUtilities"
 
 describe("crosshair", () => {
@@ -71,6 +71,21 @@ describe("crosshair", () => {
       expect([Math.round(x), Math.round(y), Math.round(width), Math.round(height)]).toEqual([
         30, 270, 60, 20,
       ])
+    })
+
+    it("erases the previous outline before drawing the next, and when the hover ends", () => {
+      heatmap()
+      mockCtx.clearRect = jest.fn()
+      crosshair(mockChartUI, 1, "hover", "mid")
+      const [x, y, width, height] = mockCtx.strokeRect.mock.calls[0]
+
+      crosshair(mockChartUI, 2, "hover", "mid")
+      expect(mockCtx.clearRect).toHaveBeenCalledWith(x - 2, y - 2, width + 4, height + 4)
+
+      mockCtx.clearRect.mockClear()
+      const [x2, y2, width2, height2] = mockCtx.strokeRect.mock.calls[1]
+      clearHoveredCell(mockChartUI)
+      expect(mockCtx.clearRect).toHaveBeenCalledWith(x2 - 2, y2 - 2, width2 + 4, height2 + 4)
     })
 
     it("draws no outline without the opt-in, for a click, or for an unknown row", () => {

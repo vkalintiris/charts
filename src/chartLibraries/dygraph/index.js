@@ -16,7 +16,7 @@ import { numericTicker, heatmapTicker } from "./tickers"
 import makeNavigation from "./navigation"
 import makeHoverX from "./hoverX"
 import makeOverlays from "./overlays"
-import crosshair from "./crosshair"
+import crosshair, { clearHoveredCell } from "./crosshair"
 import { makeDivergingStackedDataHandler } from "./divergingStack"
 import makeDygraphWithoutLegend from "./makeDygraph"
 import { makeReusableLineDataHandler } from "./reusableLineDataHandler"
@@ -166,7 +166,10 @@ export default (sdk, chart) => {
       chart.onAttributeChange("hoverX", dimensions => {
         const row = Array.isArray(dimensions) ? chart.getClosestRow(dimensions[0]) : -1
 
-        if (row === -1) return dygraph.setSelection()
+        if (row === -1) {
+          clearHoveredCell(instance)
+          return dygraph.setSelection()
+        }
 
         crosshair(instance, row, "hover", dimensions[1])
       }),
