@@ -958,6 +958,18 @@ describe("makeDimensions heatmap bucket ordering", () => {
     expect(chart.getRowDimensionValue("bucket_2", row, { valueKey: "arp" })).toBe(2)
   })
 
+  it("keeps every heatmap row when heatmapKeepEmptyRows is set", async () => {
+    const ids = ["0", "1", "2", "3", "4", "5", "6"]
+    const chart = makeHeatmapChart(ids)
+    chart.updateAttribute("heatmapKeepEmptyRows", true)
+
+    await loadHeatmapPayload(chart, ids, [[0, 0, 1, 0, 2, 0, 0]])
+
+    expect(chart.getVisibleHeatmapIds()).toEqual(ids)
+    expect(chart.getHeatmapYIndex("0")).toBe(0)
+    expect(chart.getHeatmapYIndex("6")).toBe(6)
+  })
+
   it("crops prefixed heatmap edges using raw bucket values", async () => {
     const ids = ["bucket_0", "bucket_1", "bucket_2", "bucket_3", "bucket_4", "bucket_5", "bucket_6"]
     const chart = makeHeatmapChart(ids)

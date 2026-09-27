@@ -282,6 +282,9 @@ export default (chart, sdk) => {
     const ids = getBaseVisibleHeatmapIds()
     if (!isHeatmap(chart)) return ids
 
+    // Opt-in: a fixed row set, so filtering or moving the window does not reshape the axis.
+    if (chart.getAttribute("heatmapKeepEmptyRows")) return ids
+
     const payload = chart.getPayload()
     const key = ids.join("\u0000")
 

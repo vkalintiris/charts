@@ -130,6 +130,7 @@ export default {
   heatmapLabelUnit: null,
   heatmapCellGap: 0,
   heatmapLegend: null,
+  heatmapKeepEmptyRows: false,
   groupingMethod: "average",
   groupingTime: 0,
   urlOptions: [],
