@@ -292,6 +292,28 @@ describe("hoverX", () => {
     )
   })
 
+  it("ignores clicks when enabledClick is false", () => {
+    chart.getAttribute = jest.fn(key => (key === "enabledClick" ? false : null))
+    hoverXInstance.toggle(true)
+
+    const clickHandler = chartUI.on.mock.calls.find(call => call[0] === "click")[1]
+    const mockEvent = {
+      offsetX: 100,
+      offsetY: 100,
+      target: { getBoundingClientRect: () => ({ left: 0, top: 0 }) },
+    }
+
+    clickHandler(mockEvent, 1640995200000, [])
+
+    expect(chartUI.sdk.trigger).not.toHaveBeenCalledWith(
+      "highlightClick",
+      expect.anything(),
+      expect.anything(),
+      expect.anything()
+    )
+    expect(chart.trigger).not.toHaveBeenCalledWith("annotationCreate", expect.anything())
+  })
+
   it("skips annotation creation near existing annotations", () => {
     chart.getAttribute = jest.fn(key => {
       if (key === "overlays") return { 1: { type: "annotation", timestamp: 1640995200 } }
