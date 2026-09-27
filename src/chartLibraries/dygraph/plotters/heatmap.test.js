@@ -71,6 +71,7 @@ describe("heatmap plotter", () => {
     heatmapPlotter(chartUI)(plotter)
 
     expect(ctx.strokeRect).toHaveBeenCalledTimes(unmarked + 1)
+    expect(ctx.strokeStyle).toBe("#E6550D")
     expect(ctx.save).toHaveBeenCalledTimes(1)
     expect(ctx.restore).toHaveBeenCalledTimes(1)
   })
