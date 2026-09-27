@@ -77,6 +77,8 @@ const Dimensions = () => {
     if (isHeatmap && chart.getAttribute("heatmapPopoverHideZeros"))
       dimensionIds = dimensionIds.filter(id => chart.getDimensionValue(id, index))
 
+    if (isHeatmap && chart.getAttribute("heatmapPopoverTopFirst")) dimensionIds.reverse()
+
     const rowIndex = dimensionIds.findIndex(id => id === row)
 
     const total = dimensionIds.length

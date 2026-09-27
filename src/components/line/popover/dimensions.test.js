@@ -86,6 +86,31 @@ describe("line popover Dimensions", () => {
     ])
   })
 
+  it("lists the rows top row first, as the heatmap draws them, with heatmapPopoverTopFirst", async () => {
+    const ids = ["a", "b", "c"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapKeepEmptyRows: true,
+        heatmapPopoverTopFirst: true,
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 3]])
+    chart.updateAttribute("hoverX", [1000, "b"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    expect(screen.getAllByTestId("chartDimensions-name").map(node => node.textContent)).toEqual([
+      "c",
+      "b",
+      "a",
+    ])
+  })
+
   it("draws the hovered row's bar in heatmapHoverColor", async () => {
     const ids = ["a", "b", "c"]
     const { chart } = makeTestChart({

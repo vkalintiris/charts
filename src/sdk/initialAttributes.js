@@ -138,6 +138,8 @@ export default {
   heatmapHoverColor: null,
   // Heatmap popover: leave out rows whose value is 0.
   heatmapPopoverHideZeros: false,
+  // Heatmap popover: list rows top row first, as the heatmap draws them (default: bottom row first).
+  heatmapPopoverTopFirst: false,
   // Heatmap popover: only the dimension and value columns (no anomaly rate or annotations).
   heatmapPopoverValueOnly: false,
   heatmapPalette: null,
