@@ -58,7 +58,7 @@ export default chartUI => plotter => {
   // Drawn after every cell so neighbouring cells do not paint over the outline.
   ctx.save()
   ctx.lineWidth = 2
-  ctx.strokeStyle = "#E6550D"
+  ctx.strokeStyle = "#F28E2B"
   ctx.strokeRect(...markedRect)
   ctx.restore()
 }
