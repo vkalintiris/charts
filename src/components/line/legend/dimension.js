@@ -1,5 +1,5 @@
 import React from "react"
-import { useTheme } from "styled-components"
+import styled, { useTheme } from "styled-components"
 import { TextBig, TextSmall, Flex, ProgressBar, getColor } from "@netdata/netdata-ui"
 import Color, { Color as ColorContainer } from "@/components/line/dimensions/color"
 import Name, { Name as NameContainer } from "@/components/line/dimensions/name"
@@ -17,8 +17,13 @@ import {
 import Tooltip from "@/components/tooltip"
 import { useIsHeatmap } from "@/helpers/heatmap"
 
+// Shift-click merges dimensions; without this the browser also extends a text selection.
+const Unselectable = styled(Flex)`
+  user-select: none;
+`
+
 const DimensionContainer = props => (
-  <Flex
+  <Unselectable
     width={{ min: 22, max: 50 }}
     flex={false}
     gap={0.5}
