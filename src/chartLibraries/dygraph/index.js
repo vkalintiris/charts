@@ -186,7 +186,7 @@ export default (sdk, chart) => {
 
         const clickRow = getClickRow(chart.getAttribute("clickX"))
         if (clickRow !== -1) drawCrosshairLine(instance, clickRow, "click")
-        if (row !== -1) drawHoverCell(instance, row, dimensions[1])
+        if (row !== -1) drawHoverCell(instance, dimensions[0], dimensions[1])
       }),
       chart.onAttributeChange("clickX", dimensions => {
         const row = getClickRow(dimensions)

@@ -1,3 +1,4 @@
+import { findHeatmapCell } from "@/helpers/heatmap"
 import makeHeatmapCell from "./heatmapCell"
 
 const themeAttrByFlavour = {
@@ -48,18 +49,18 @@ export const clearInteractionLayer = chartUI => {
   ctx.restore()
 }
 
-export const drawHoverCell = (chartUI, row, dimensionId) => {
+export const drawHoverCell = (chartUI, x, dimensionId) => {
   const { chart } = chartUI
-  const yIndex = chart.getHeatmapYIndex(dimensionId)
-  const rowData = chart.getPayload().data[row]
-  if (yIndex === -1 || !Array.isArray(rowData)) return
-
   const dygraph = chartUI.getDygraph()
+  const cell = findHeatmapCell(chart, x, dimensionId, () => dygraph.xAxisRange())
+  if (!cell) return
+
+  const rowData = chart.getPayload().data[cell.row]
   const { canvas_ctx_: ctx } = dygraph
   const getCell = makeHeatmapCell(dygraph, dygraph.layout_.points?.[0], {
     gap: chart.getAttribute("heatmapCellGap"),
   })
-  const { x, y, width, height } = getCell(dygraph.toDomXCoord(rowData[0]), yIndex)
+  const { x: left, y, width, height } = getCell(dygraph.toDomXCoord(rowData[0]), cell.yIndex)
 
   ctx.save()
   ctx.setLineDash(hoverCellLineDash)
@@ -67,7 +68,7 @@ export const drawHoverCell = (chartUI, row, dimensionId) => {
   ctx.strokeStyle =
     chart.getAttribute("heatmapHoverColor") || chart.getThemeAttribute("themeCrosshair")
   ctx.strokeRect(
-    x + hoverCellLineWidth / 2,
+    left + hoverCellLineWidth / 2,
     y + hoverCellLineWidth / 2,
     Math.max(0, width - hoverCellLineWidth),
     Math.max(0, height - hoverCellLineWidth)
