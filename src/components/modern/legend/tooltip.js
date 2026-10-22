@@ -57,7 +57,7 @@ const Grid = styled(Box)`
 `
 
 const Name = styled(Box).attrs({ as: "span", width: { min: "0px" }, overflow: "hidden" })`
-  color: ${getColor("text")};
+  color: ${props => props.$hoverColor || getColor("text")(props)};
   font-weight: ${({ isStrong }) => (isStrong ? 600 : 400)};
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -102,6 +102,7 @@ const Tooltip = () => {
   const chart = useChart()
   const isHeatmap = useIsHeatmap()
   const [, hoveredId] = useAttributeValue("hoverX") || []
+  const hoverColor = useAttributeValue("heatmapHoverColor")
   const { index, timestamp, getRow } = useLegendRows({ withRows: false })
 
   if (index === -1) return null
@@ -132,7 +133,11 @@ const Tooltip = () => {
         {shown.map(row => (
           <React.Fragment key={row.id}>
             {!isHeatmap && <LineSwatch swatchColor={row.color} />}
-            <Name isStrong={row.id === hoveredId} data-testid="modernTooltip-name">
+            <Name
+              isStrong={row.id === hoveredId}
+              $hoverColor={isHeatmap && row.id === hoveredId ? hoverColor : null}
+              data-testid="modernTooltip-name"
+            >
               {row.name}
             </Name>
             <Value>{row.display}</Value>

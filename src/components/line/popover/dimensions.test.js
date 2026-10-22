@@ -8,11 +8,7 @@ import {
   renderWithChart,
 } from "@jest/testUtilities"
 import Dimensions, { rowFlavours } from "./dimensions"
-import {
-  getPopoverDimensionColumnWidth,
-  getPopoverWidth,
-  popoverGridColumns,
-} from "./layout"
+import { getPopoverDimensionColumnWidth, getPopoverWidth, popoverGridColumns } from "./layout"
 
 const getExpectedLayout = (names, infoColumn) => {
   const dimensionColumnWidth = getPopoverDimensionColumnWidth(names, { infoColumn })
@@ -62,6 +58,28 @@ describe("line popover Dimensions", () => {
     )
   })
 
+  it("paints the hovered heatmap row in the hover colour, with its name above the bar", async () => {
+    const ids = ["1", "2", "3", "4", "5"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapHoverColor: "#F28E2B",
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 3, 2, 1]])
+    chart.updateAttribute("hoverX", [1000, "3"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    const above = screen.getAllByTestId("chartPopover-nameAboveBar")
+    expect(above).toHaveLength(1)
+    expect(above[0]).toHaveTextContent("3")
+  })
+
   it("keeps generic more-values windowing for non-heatmap popovers", async () => {
     const ids = Array.from({ length: 12 }, (_, index) => `dim${index}`)
     const { chart } = makeTestChart({
@@ -73,11 +91,7 @@ describe("line popover Dimensions", () => {
       },
     })
 
-    await loadLinePayload(
-      chart,
-      ids,
-      [ids.map((_, index) => index)]
-    )
+    await loadLinePayload(chart, ids, [ids.map((_, index) => index)])
     chart.updateAttribute("hoverX", [1000, "not-a-dimension"])
 
     renderWithChart(<Dimensions />, { chart })
@@ -97,11 +111,7 @@ describe("line popover Dimensions", () => {
       },
     })
 
-    await loadLinePayload(
-      chart,
-      ids,
-      [ids.map((_, index) => index)]
-    )
+    await loadLinePayload(chart, ids, [ids.map((_, index) => index)])
     chart.updateAttribute("hoverX", [1000, "dim2"])
 
     renderWithChart(<Dimensions />, { chart })

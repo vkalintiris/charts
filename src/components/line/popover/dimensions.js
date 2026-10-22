@@ -58,6 +58,7 @@ const Dimensions = () => {
   const chart = useChart()
   const [x, row] = useAttributeValue("hoverX") || emptyArray
   const isHeatmap = chart.getAttribute("chartType") === "heatmap"
+  const hoverColor = useAttributeValue("heatmapHoverColor")
 
   const [from, to, total, ids] = useMemo(() => {
     const index = chart.getClosestRow(x)
@@ -140,7 +141,13 @@ const Dimensions = () => {
           </TextMicro>
         </GridHeader>
         {ids.map(id => (
-          <Dimension key={id} id={id} strong={row === id} rowFlavour={rowFlavour} />
+          <Dimension
+            key={id}
+            id={id}
+            strong={row === id}
+            hoverColor={isHeatmap ? hoverColor : undefined}
+            rowFlavour={rowFlavour}
+          />
         ))}
       </Grid>
       <Flex flex={false} height={3}>
