@@ -911,6 +911,18 @@ describe("makeDimensions heatmap bucket ordering", () => {
     expect(chart.getDimensionName("duration_1024")).toBe("1Ki")
   })
 
+  it("matches a legend selection by name again when the bucket unit changes", () => {
+    const chart = makeHeatmapChart(["duration_1024", "duration_4194304", "duration_+Inf"], {
+      selectedLegendDimensions: ["1.02 µs"],
+    })
+
+    expect(chart.getVisibleDimensionIds()).toEqual([])
+
+    chart.updateAttribute("heatmapBucketUnit", "ns")
+
+    expect(chart.getVisibleDimensionIds()).toEqual(["duration_1024"])
+  })
+
   it("falls back to payload order for non-numeric heatmaps", () => {
     const chart = makeHeatmapChart(["low", "high", "+Inf"])
 
