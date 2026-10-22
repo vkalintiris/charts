@@ -531,6 +531,19 @@ describe("dygraphChart", () => {
       "strokeRect",
     ])
 
+    const { setLineDash } = mockDygraph.canvas_ctx_
+    calls.length = 0
+    setLineDash.mockClear()
+    chart.updateAttribute("clickX", [1617946860000, null])
+    expect(calls.map(([name]) => name)).toEqual(["clearRect", "strokeRect"])
+    expect(setLineDash).toHaveBeenCalledWith([2, 2])
+
+    calls.length = 0
+    setLineDash.mockClear()
+    chart.updateAttribute("clickX", [null, null])
+    expect(calls.map(([name]) => name)).toEqual(["clearRect", "strokeRect"])
+    expect(setLineDash).not.toHaveBeenCalledWith([2, 2])
+
     calls.length = 0
     chart.updateAttribute("heatmapHoverCell", false)
     expect(calls.map(([name]) => name)).toEqual(["clearRect"])
