@@ -54,4 +54,16 @@ describe("heatmap footer legend", () => {
     expect(screen.getByTestId("heatmap-legend")).toBeInTheDocument()
     expect(screen.queryByTestId("chartLegend")).not.toBeInTheDocument()
   })
+
+  it("keeps legend entries out of text selection in both designs", async () => {
+    await renderFooter({ designFlavour: "default" })
+    screen
+      .getAllByTestId("chartLegendDimension")
+      .forEach(entry => expect(window.getComputedStyle(entry).userSelect).toBe("none"))
+
+    await renderFooter({ designFlavour: "modern" })
+    screen
+      .getAllByTestId("modernLegend-entry")
+      .forEach(entry => expect(window.getComputedStyle(entry).userSelect).toBe("none"))
+  })
 })
