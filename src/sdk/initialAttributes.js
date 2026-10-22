@@ -125,6 +125,8 @@ export default {
   heatmapColorScale: "linear",
   heatmapCellClick: false,
   heatmapMarkedCell: null,
+  heatmapHoverCell: false,
+  heatmapHoverColor: null,
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,

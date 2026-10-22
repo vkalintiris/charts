@@ -757,6 +757,31 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
+  it("outlines the hovered cell with a dashed line, and ignores rows of other charts", async () => {
+    const { chart, instance, element } = await mountHeatmap({ heatmapHoverCell: true })
+
+    instance.mount(element)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    const overlay = element.querySelector(".netdata-crosshair-overlay").getContext("2d")
+    const strokes = []
+    const strokeRect = jest.spyOn(overlay, "strokeRect").mockImplementation(function () {
+      strokes.push([this.lineWidth, this.getLineDash()])
+    })
+    const [x] = chart.getPayload().data[1]
+
+    chart.updateAttribute("hoverX", [x, chart.getVisibleHeatmapIds()[2]])
+    expect(strokes).toEqual([[1.5, [3, 3]]])
+
+    strokes.length = 0
+    chart.updateAttribute("hoverX", [x, "series-from-another-chart"])
+    expect(strokes).toEqual([])
+
+    strokeRect.mockRestore()
+    cleanup(instance, element)
+  })
+
   it("redraws when the cell gap or the colours change", async () => {
     const { chart, instance, element } = await mountHeatmap()
 

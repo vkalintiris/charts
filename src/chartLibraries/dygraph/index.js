@@ -21,7 +21,7 @@ import { numericTicker, heatmapTicker } from "./tickers"
 import makeNavigation from "./navigation"
 import makeHoverX from "./hoverX"
 import makeOverlays from "./overlays"
-import crosshair from "./crosshair"
+import crosshair, { drawCrosshairLine, clearInteractionLayer, drawHoverCell } from "./crosshair"
 import { makeDivergingStackedDataHandler } from "./divergingStack"
 import makeDygraphWithoutLegend from "./makeDygraph"
 import { makeReusableLineDataHandler } from "./reusableLineDataHandler"
@@ -165,21 +165,31 @@ export default (sdk, chart) => {
             : chart.getAttribute("unitsConversionFractionDigits")[0],
       })
 
+    const getClickRow = dimensions =>
+      Array.isArray(dimensions) &&
+      isInXRange(dimensions[0], dygraph.xAxisRange(), chart.getAttribute("viewUpdateEvery"))
+        ? chart.getClosestRow(dimensions[0])
+        : -1
+
     listeners = [
       chartUI.on("resize", () => dygraph.resize()),
       chart.onAttributeChange("hoverX", dimensions => {
         const row = Array.isArray(dimensions) ? chart.getClosestRow(dimensions[0]) : -1
+        const hoverCell = isHeatmap(chart) && chart.getAttribute("heatmapHoverCell")
 
-        if (row === -1) return dygraph.setSelection()
+        if (hoverCell) clearInteractionLayer(instance)
 
-        crosshair(instance, row)
+        if (row === -1) dygraph.setSelection()
+        else crosshair(instance, row)
+
+        if (!hoverCell) return
+
+        const clickRow = getClickRow(chart.getAttribute("clickX"))
+        if (clickRow !== -1) drawCrosshairLine(instance, clickRow, "click")
+        if (row !== -1) drawHoverCell(instance, row, dimensions[1])
       }),
       chart.onAttributeChange("clickX", dimensions => {
-        const row =
-          Array.isArray(dimensions) &&
-          isInXRange(dimensions[0], dygraph.xAxisRange(), chart.getAttribute("viewUpdateEvery"))
-            ? chart.getClosestRow(dimensions[0])
-            : -1
+        const row = getClickRow(dimensions)
 
         if (row === -1) return dygraph.setSelection()
 
