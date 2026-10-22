@@ -28,3 +28,13 @@ export default (g, points, { gap = 0, ratio = window.devicePixelRatio || 1 } = {
     return { x: left, y: top, width: right - left, height: bottom - top }
   }
 }
+
+export const strokeCellInside = (ctx, { x, y, width, height }, lineWidth) => {
+  ctx.lineWidth = lineWidth
+  ctx.strokeRect(
+    x + lineWidth / 2,
+    y + lineWidth / 2,
+    Math.max(0, width - lineWidth),
+    Math.max(0, height - lineWidth)
+  )
+}
