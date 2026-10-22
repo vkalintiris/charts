@@ -24,4 +24,14 @@ describe("uplot heatmap cell", () => {
     const narrow = makeHeatmapCell(makeSelf([10, 12, 14]), { gap: 2 })
     expect(narrow(12, 1)).toMatchObject({ x: 22, width: 4, height: 38 })
   })
+
+  it("lets neighbouring cells share an edge when the column pitch is fractional", () => {
+    const xs = [10, 17.7, 25.4, 33.1]
+    const getCell = makeHeatmapCell(makeSelf(xs))
+    const cells = xs.map(x => getCell(x, 0))
+
+    cells
+      .slice(1)
+      .forEach((cell, index) => expect(cell.x).toBe(cells[index].x + cells[index].width))
+  })
 })

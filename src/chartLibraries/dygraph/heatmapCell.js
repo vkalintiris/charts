@@ -1,3 +1,5 @@
+import { fitHeatmapGap } from "@/helpers/heatmap"
+
 export const getHeatmapCellWidth = (g, points = []) => {
   let minSep = Infinity
   for (let i = 1; i < points.length; i++) {
@@ -5,18 +7,16 @@ export const getHeatmapCellWidth = (g, points = []) => {
     if (sep > 0 && sep < minSep) minSep = sep
   }
 
-  return Number.isFinite(minSep) ? Math.floor(minSep) : g.getArea().w
+  return Number.isFinite(minSep) ? minSep : g.getArea().w
 }
-
-const fitGap = (size, gap) => (size >= 2 * gap + 1 ? gap : 0)
 
 const snap = (value, ratio) => Math.round(value * ratio) / ratio
 
 export default (g, points, { gap = 0, ratio = window.devicePixelRatio || 1 } = {}) => {
   const width = getHeatmapCellWidth(g, points)
   const height = Math.abs(g.toDomYCoord(1) - g.toDomYCoord(0))
-  const gapX = fitGap(width, gap)
-  const gapY = fitGap(height, gap)
+  const gapX = fitHeatmapGap(width, gap)
+  const gapY = fitHeatmapGap(height, gap)
 
   return (canvasx, yIndex) => {
     const centerY = g.toDomYCoord(yIndex)
