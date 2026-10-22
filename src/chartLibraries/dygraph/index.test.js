@@ -521,6 +521,20 @@ describe("dygraphChart", () => {
     expect(calls[0]).toEqual(["clearRect", 0, 0, 800, 400])
     expect(calls[3][2]).toBeLessThan(calls[1][2])
 
+    calls.length = 0
+    chart.updateAttribute("hoverX", [1617946860000, "2"])
+    chart.updateAttribute("heatmapMarkedCell", { x: 1617946860000, id: "3" })
+    expect(calls.map(([name]) => name)).toEqual([
+      "clearRect",
+      "strokeRect",
+      "clearRect",
+      "strokeRect",
+    ])
+
+    calls.length = 0
+    chart.updateAttribute("heatmapHoverCell", false)
+    expect(calls.map(([name]) => name)).toEqual(["clearRect"])
+
     delete mockDygraph.canvas_ctx_
     delete mockDygraph.layout_
     delete mockDygraph.toDomYCoord
