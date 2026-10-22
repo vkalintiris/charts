@@ -364,6 +364,55 @@ describe("dygraphChart", () => {
     expect(formatter("0.005")).toBe(0.005)
   })
 
+  it("labels the heatmap y-axis in the bucket unit and follows a unit change", async () => {
+    const ids = ["duration_1024", "duration_4194304", "duration_+Inf"]
+    const { sdk, chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedLegendDimensions: [],
+        heatmapBucketUnit: "ns",
+        viewDimensions: {
+          ids,
+          names: ids,
+          priorities: ids.map((_, index) => index),
+          units: ids.map(() => ""),
+          contexts: ids.map(() => ""),
+          grouped: ["dimension"],
+        },
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 3]], { timestamp: 1617946860000 })
+    chart.getDateWindow = () => [1617946860000, 1617947750000]
+    chart.formatXAxis = x => x.toString()
+    chart.getThemeAttribute = () => "#333"
+    chart.getUnitSign = () => ""
+
+    const instance = dygraphChart(sdk, chart)
+    instance.mount(document.createElement("div"))
+
+    const opts = key => ({ pixelsPerLabel: 10, axisLabelFormatter: label => label })[key]
+    const axis = { yAxisRange: () => [0, 3], getArea: () => ({ h: 300 }) }
+    const yLabels = options =>
+      options.axes.y
+        .ticker(0, 3, 300, opts, axis)
+        .filter(tick => tick.label)
+        .map(tick => tick.label)
+
+    const Dygraph = require("dygraphs")
+    expect(yLabels(Dygraph.mock.calls[Dygraph.mock.calls.length - 1][2])).toEqual([
+      "1.02 µs",
+      "4.19 ms",
+      "+Inf",
+    ])
+
+    chart.updateAttribute("heatmapBucketUnit", null)
+
+    const { calls } = mockDygraph.updateOptions.mock
+    expect(yLabels(calls[calls.length - 1][0])).toEqual(["1Ki", "4Mi", "+Inf"])
+  })
+
   it("uses cropped heatmap bucket count for y-axis range", async () => {
     const ids = ["0", "1", "2", "3", "4", "5", "6"]
     const { sdk, chart } = makeTestChart({

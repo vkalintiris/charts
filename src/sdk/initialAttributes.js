@@ -117,6 +117,7 @@ export default {
   // unset means "render whatever the agent reported"; only an explicit choice converts
   temperature: undefined,
   secondsAsTime: true,
+  heatmapBucketUnit: null,
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,
