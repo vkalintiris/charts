@@ -728,6 +728,26 @@ describe("uplotChart heatmap", () => {
 
     cleanup(instance, element)
   })
+
+  it("labels the y-axis in the bucket unit and redraws on a unit change", async () => {
+    const { chart, instance, element } = await mountHeatmap({ heatmapBucketUnit: "ms" })
+
+    instance.mount(element)
+    const u = instance.getUPlot()
+    const redraw = jest.spyOn(u, "redraw")
+    const labels = () => u.axes[1].values(u, [0, 1, 2, 3, 4])
+
+    expect(chart.getVisibleHeatmapIds()).toEqual(["1", "2", "3", "4", "5"])
+    expect(labels()).toEqual(["1 ms", "2 ms", "3 ms", "4 ms", "5 ms"])
+
+    chart.updateAttribute("heatmapBucketUnit", "s")
+
+    expect(redraw).toHaveBeenCalledWith(false, true)
+    expect(labels()).toEqual(["1 s", "2 s", "3 s", "4 s", "5 s"])
+
+    redraw.mockRestore()
+    cleanup(instance, element)
+  })
 })
 
 describe("uplotChart bars", () => {

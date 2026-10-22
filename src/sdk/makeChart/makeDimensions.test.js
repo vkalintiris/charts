@@ -879,6 +879,38 @@ describe("makeDimensions heatmap bucket ordering", () => {
     expect(chart.getDimensionIndex("bucket_1024")).toBe(1)
   })
 
+  it("labels bucket bounds in the heatmap bucket unit", () => {
+    const chart = makeHeatmapChart(["duration_1024", "duration_4194304", "duration_+Inf"], {
+      heatmapBucketUnit: "ns",
+    })
+
+    expect(chart.getHeatmapScale()).toEqual({ duration: "ns" })
+    expect(chart.getDimensionIds().map(id => chart.getDimensionName(id))).toEqual([
+      "1.02 µs",
+      "4.19 ms",
+      "+Inf",
+    ])
+  })
+
+  it("follows a heatmap bucket unit set after the buckets", () => {
+    const chart = makeHeatmapChart(["duration_1024", "duration_4194304", "duration_+Inf"])
+    const onDimensionChanged = jest.fn()
+    chart.on("dimensionChanged", onDimensionChanged)
+
+    expect(chart.getHeatmapScale()).toBe("binary")
+    expect(chart.getDimensionName("duration_1024")).toBe("1Ki")
+
+    chart.updateAttribute("heatmapBucketUnit", "ns")
+
+    expect(onDimensionChanged).toHaveBeenCalledTimes(1)
+    expect(chart.getDimensionName("duration_1024")).toBe("1.02 µs")
+
+    chart.updateAttribute("heatmapBucketUnit", null)
+
+    expect(chart.getHeatmapScale()).toBe("binary")
+    expect(chart.getDimensionName("duration_1024")).toBe("1Ki")
+  })
+
   it("falls back to payload order for non-numeric heatmaps", () => {
     const chart = makeHeatmapChart(["low", "high", "+Inf"])
 

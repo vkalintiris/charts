@@ -195,6 +195,11 @@ export default (sdk, chart) => {
 
         updateOptions(makeChartTypeOptions())
       }),
+      chart.onAttributeChange("heatmapBucketUnit", () => {
+        if (chart.getAttribute("processing")) return
+
+        updateOptions(makeChartTypeOptions())
+      }),
       // scalable conversions move the prefix, conversable ones move the base
       chart.onAttributeChange("unitsConversionPrefix", onUnitsConversionChange),
       chart.onAttributeChange("unitsConversionBase", onUnitsConversionChange),

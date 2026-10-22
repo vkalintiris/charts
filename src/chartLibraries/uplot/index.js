@@ -1654,6 +1654,7 @@ export default (sdk, chart) => {
         renderCrosshair()
       }),
       chart.onAttributeChange("timezone", () => u && u.redraw()),
+      chart.onAttributeChange("heatmapBucketUnit", () => u && u.redraw(false, true)),
       chart.onAttributeChange("anomalySpotlight", () => u && u.redraw(false, false)),
       chart.onAttributeChange("unitsConversionPrefix", onUnitsConversionChange),
       chart.onAttributeChange("unitsConversionBase", onUnitsConversionChange),
