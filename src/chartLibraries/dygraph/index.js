@@ -198,6 +198,8 @@ export default (sdk, chart) => {
         crosshair(instance, row)
       }),
       chart.onAttributeChange("clickX", dimensions => {
+        if (hasHoverCell()) return redrawInteraction()
+
         const row = getClickRow(dimensions)
 
         if (row === -1) return dygraph.setSelection()
