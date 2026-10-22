@@ -1,9 +1,12 @@
+import { act } from "@testing-library/react"
+import { makeTestChart, renderHookWithChart } from "@jest/testUtilities"
 import {
   heatmapTypes,
   isHeatmap,
   isIncremental,
   heatmapOrChartType,
   makeGetColor,
+  useGetColor,
   withoutPrefix,
   cropHeatmapZeroEdges,
   getHeatmapRowsRange,
@@ -153,6 +156,29 @@ describe("heatmap utilities", () => {
       const getColor = makeGetColor(mockChart, 0.5)
       const color = getColor(100)
       expect(color).toContain("0.5")
+    })
+
+    it("spans the whole palette from the smallest count to max, and clamps above it", () => {
+      const getColor = makeGetColor(mockChart)
+
+      expect(getColor(800)).toBe("rgb(253, 231, 37)")
+      expect(getColor(5000)).toBe("rgb(253, 231, 37)")
+      expect(getColor(400)).not.toBe(getColor(800))
+    })
+  })
+
+  describe("useGetColor", () => {
+    it("follows a change of max", () => {
+      const { chart } = makeTestChart({ attributes: { max: 800 } })
+      const { result, rerender } = renderHookWithChart(() => useGetColor(), { chart })
+
+      expect(result.current(800)).toBe("rgb(253, 231, 37)")
+
+      act(() => chart.updateAttribute("max", 1600))
+      rerender()
+
+      expect(result.current(800)).not.toBe("rgb(253, 231, 37)")
+      expect(result.current(1600)).toBe("rgb(253, 231, 37)")
     })
   })
 
