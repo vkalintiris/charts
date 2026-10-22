@@ -261,6 +261,39 @@ describe("hoverX", () => {
     expect(chart.updateAttribute).not.toHaveBeenCalledWith("draftAnnotation", expect.anything())
   })
 
+  it("gives the heatmap row, not the empty anomaly band, at the top of a heatmap", () => {
+    const visibleHeatmapIds = ["low", "mid", "high"]
+
+    chart.getAttribute = jest.fn(key => {
+      if (key === "chartType") return "heatmap"
+      if (key === "overlays") return {}
+      return null
+    })
+    chart.getVisibleHeatmapIds = jest.fn(() => visibleHeatmapIds)
+    chart.getPayload = jest.fn(() => ({
+      all: [[0, [1, 0, 0]]],
+      point: { value: 0, arp: 1, pa: 2 },
+    }))
+    chart.getPayloadDimensionIds = jest.fn(() => ["low"])
+    chart.isDimensionVisible = jest.fn(() => true)
+
+    chartUI.getDygraph = jest.fn(() => ({
+      getArea: jest.fn(() => ({ h: 200 })),
+      toDomYCoord: jest.fn(index => [190, 100, 10][index]),
+    }))
+
+    hoverXInstance.toggle(true)
+    const highlightHandler = chartUI.on.mock.calls.find(call => call[0] === "highlightCallback")[1]
+
+    highlightHandler(
+      { clientX: 100, clientY: 5, target: { getBoundingClientRect: () => ({ left: 0, top: 0 }) } },
+      1640995200000,
+      [{ idx: 0 }]
+    )
+
+    expect(chartUI.sdk.trigger).toHaveBeenCalledWith("highlightHover", chart, 1640995200000, "high")
+  })
+
   it("handles destroy method", () => {
     hoverXInstance.toggle(true)
     hoverXInstance.destroy()

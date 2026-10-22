@@ -1,5 +1,6 @@
 import getOffsets from "@/helpers/eventOffset"
 import { isHeatmap } from "@/helpers/heatmap"
+import { hasAnomalyAt, hasAnnotationAt } from "@/chartLibraries/helpers/rowMarks"
 import { findDivergingStackedPoint } from "./divergingStack"
 
 const shouldFindMaxValue = {
@@ -37,10 +38,15 @@ export default chartUI => {
 
     const { offsetX, offsetY } = getOffsets(event)
 
-    if (offsetY > _dygraph.getArea().h - 10) return { seriesName: "ANNOTATIONS" }
-    if (offsetY < 15) return { seriesName: "ANOMALY_RATE" }
+    const heatmap = isHeatmap(chartUI.chart)
+    const row = points[0]?.idx
 
-    if (isHeatmap(chartUI.chart)) {
+    if (offsetY > _dygraph.getArea().h - 10 && (!heatmap || hasAnnotationAt(chartUI.chart, row)))
+      return { seriesName: "ANNOTATIONS" }
+    if (offsetY < 15 && (!heatmap || hasAnomalyAt(chartUI.chart, row)))
+      return { seriesName: "ANOMALY_RATE" }
+
+    if (heatmap) {
       const dimensionId = getClosestHeatmapDimension(offsetY)
       return dimensionId ? { dimensionId } : {}
     }
