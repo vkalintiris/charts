@@ -449,6 +449,10 @@ describe("dygraphChart", () => {
 
     const { calls } = mockDygraph.updateOptions.mock
     expect(calls[calls.length - 1][0].valueRange).toEqual([0.5, 4.5])
+
+    const before = calls.length
+    chart.updateAttribute("heatmapCellGap", 1)
+    expect(calls.length).toBe(before + 1)
   })
 
   it("uses cropped heatmap bucket count for y-axis range", async () => {

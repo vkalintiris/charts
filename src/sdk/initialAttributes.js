@@ -118,6 +118,7 @@ export default {
   temperature: undefined,
   secondsAsTime: true,
   heatmapBucketUnit: null,
+  heatmapCellGap: 0,
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,

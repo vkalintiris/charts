@@ -238,6 +238,7 @@ export default (sdk, chart) => {
         })
       }),
       chart.onAttributeChange("timezone", () => updateOptions({})),
+      chart.onAttributeChange("heatmapCellGap", () => updateOptions({})),
     ].filter(Boolean)
 
     overlays.toggle()

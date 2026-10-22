@@ -665,7 +665,7 @@ export default (sdk, chart) => {
 
     const { ctx } = self
     const getColor = makeGetColor(chart)
-    const getCell = makeHeatmapCell(self)
+    const getCell = makeHeatmapCell(self, { gap: chart.getAttribute("heatmapCellGap") })
     const { all } = chart.getPayload()
     if (!all) return
 
@@ -1655,6 +1655,7 @@ export default (sdk, chart) => {
       }),
       chart.onAttributeChange("timezone", () => u && u.redraw()),
       chart.onAttributeChange("heatmapBucketUnit", () => u && u.redraw(false, true)),
+      chart.onAttributeChange("heatmapCellGap", () => u && u.redraw(false, false)),
       chart.onAttributeChange("anomalySpotlight", () => u && u.redraw(false, false)),
       chart.onAttributeChange("unitsConversionPrefix", onUnitsConversionChange),
       chart.onAttributeChange("unitsConversionBase", onUnitsConversionChange),

@@ -1,4 +1,8 @@
-export default self => {
+import getPxRatio from "./pxRatio"
+
+const fitGap = (size, gap) => (size >= 2 * gap + 1 ? gap : 0)
+
+export default (self, { gap = 0 } = {}) => {
   const xs = self.data[0] || []
 
   let minSep = Infinity
@@ -9,11 +13,18 @@ export default self => {
 
   const width = Number.isFinite(minSep) ? Math.floor(minSep) : self.bbox.width
   const height = Math.abs(self.valToPos(1, "y", true) - self.valToPos(0, "y", true))
+  const gapPx = gap * getPxRatio()
+  const gapX = fitGap(width, gapPx)
+  const gapY = fitGap(height, gapPx)
 
-  return (x, yIndex) => ({
-    x: self.valToPos(x, "x", true) - width / 2,
-    y: self.valToPos(yIndex, "y", true) - height / 2,
-    width,
-    height,
-  })
+  return (x, yIndex) => {
+    const centerX = self.valToPos(x, "x", true)
+    const centerY = self.valToPos(yIndex, "y", true)
+    const left = Math.round(centerX - width / 2 + gapX / 2)
+    const right = Math.round(centerX + width / 2 - gapX / 2)
+    const top = Math.round(centerY - height / 2 + gapY / 2)
+    const bottom = Math.round(centerY + height / 2 - gapY / 2)
+
+    return { x: left, y: top, width: right - left, height: bottom - top }
+  }
 }

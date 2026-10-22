@@ -16,4 +16,12 @@ describe("uplot heatmap cell", () => {
     const getCell = makeHeatmapCell(makeSelf([10]))
     expect(getCell(10, 0).width).toBe(800)
   })
+
+  it("insets the cell by half the gap and drops a gap that does not fit", () => {
+    const getCell = makeHeatmapCell(makeSelf([10, 20, 30]), { gap: 2 })
+    expect(getCell(20, 1)).toEqual({ x: 31, y: 321, width: 18, height: 38 })
+
+    const narrow = makeHeatmapCell(makeSelf([10, 12, 14]), { gap: 2 })
+    expect(narrow(12, 1)).toMatchObject({ x: 22, width: 4, height: 38 })
+  })
 })
