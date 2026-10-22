@@ -1050,6 +1050,20 @@ describe("uplotChart click-to-annotate", () => {
     teardown()
   })
 
+  it("neither annotates nor fires highlightClick when clicks are disabled", async () => {
+    const { sdk, chart, click, teardown } = await mount({ navigation: "pan", enabledClick: false })
+
+    const clicks = []
+    sdk.on("highlightClick", (c, ts) => clicks.push(ts))
+
+    click(400)
+
+    expect(clicks).toEqual([])
+    expect(chart.getAttribute("draftAnnotation")).toBeFalsy()
+
+    teardown()
+  })
+
   it("snaps the click timestamp to the closest row", async () => {
     const { sdk, chart, click, teardown } = await mount({ navigation: "pan" })
 
@@ -1232,6 +1246,17 @@ describe("uplotChart touch navigation", () => {
     expect(panEnds).toBe(1)
 
     setScaleSpy.mockRestore()
+    teardown()
+  })
+
+  it("leaves clickX alone on a tap when clicks are disabled", async () => {
+    const { chart, u, teardown } = await mount({ enabledClick: false })
+
+    u.over.dispatchEvent(touchEvent("touchstart", 400))
+    u.over.dispatchEvent(touchEvent("touchend", 400))
+
+    expect(chart.getAttribute("clickX")).toBeFalsy()
+
     teardown()
   })
 

@@ -1237,6 +1237,7 @@ export default (sdk, chart) => {
       if (wasDrag) return
       if (!chart.getAttribute("enabledNavigation")) return
       if (chart.getAttribute("navigation") !== "pan") return
+      if (chart.getAttribute("enabledClick") === false) return
 
       const rect = over.getBoundingClientRect()
       const offsetX = event.clientX - rect.left
@@ -1387,6 +1388,8 @@ export default (sdk, chart) => {
       if (!touchMoved) {
         const touch = event.changedTouches?.[0]
         if (!touch) return
+
+        if (chart.getAttribute("enabledClick") === false) return
 
         const rect = over.getBoundingClientRect()
         const offsetX = touch.clientX - rect.left

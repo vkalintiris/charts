@@ -85,6 +85,7 @@ export default {
   versions: {},
 
   enabledHover: true,
+  enabledClick: true,
   syncHover: true,
   hoverX: null,
   navigation: "",

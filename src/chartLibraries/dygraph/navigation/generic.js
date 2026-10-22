@@ -151,7 +151,8 @@ export default chartUI => {
     }
 
     if (dygraphLastTouchMove === 0 && dygraphLastTouchPageX !== 0) {
-      chartUI.chart.updateAttribute("clickX", [context.initialTouches?.[0]?.dataX, null])
+      if (chartUI.chart.getAttribute("enabledClick") !== false)
+        chartUI.chart.updateAttribute("clickX", [context.initialTouches?.[0]?.dataX, null])
       return
     }
 

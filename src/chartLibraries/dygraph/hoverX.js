@@ -130,6 +130,7 @@ export default chartUI => {
   }
 
   const click = (event, x, points) => {
+    if (chartUI.chart.getAttribute("enabledClick") === false) return
     if (lastTimestamp === x) return
 
     lastPoints = points

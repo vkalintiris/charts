@@ -213,12 +213,7 @@ describe("hoverX", () => {
     )
 
     expect(findClosestPoint).not.toHaveBeenCalled()
-    expect(chartUI.sdk.trigger).toHaveBeenCalledWith(
-      "highlightHover",
-      chart,
-      1640995200000,
-      "mid"
-    )
+    expect(chartUI.sdk.trigger).toHaveBeenCalledWith("highlightHover", chart, 1640995200000, "mid")
   })
 
   it("handles destroy method", () => {
@@ -290,6 +285,28 @@ describe("hoverX", () => {
       }),
       1640995200
     )
+  })
+
+  it("ignores a click when clicks are disabled", () => {
+    chart.setAttribute("enabledClick", false)
+    hoverXInstance.toggle(true)
+
+    const clickHandler = chartUI.on.mock.calls.find(call => call[0] === "click")[1]
+    chart.getPayloadDimensionIds = jest.fn(() => ["test"])
+
+    clickHandler(
+      {
+        offsetX: 100,
+        offsetY: 100,
+        target: { getBoundingClientRect: () => ({ left: 0, top: 0 }) },
+      },
+      1640995200000,
+      []
+    )
+
+    expect(chart.updateAttribute).not.toHaveBeenCalledWith("draftAnnotation", expect.anything())
+    expect(chart.trigger).not.toHaveBeenCalled()
+    expect(chartUI.sdk.trigger).not.toHaveBeenCalled()
   })
 
   it("skips annotation creation near existing annotations", () => {
