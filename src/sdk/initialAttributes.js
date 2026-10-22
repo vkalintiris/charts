@@ -120,6 +120,8 @@ export default {
   heatmapBucketUnit: null,
   heatmapCellGap: 0,
   heatmapKeepEmptyRows: false,
+  heatmapPalette: null,
+  heatmapColorScale: "linear",
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,

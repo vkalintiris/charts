@@ -7,6 +7,8 @@ import {
   heatmapOrChartType,
   makeGetColor,
   useGetColor,
+  getHeatmapPalette,
+  heatmapDefaultPalette,
   withoutPrefix,
   cropHeatmapZeroEdges,
   getHeatmapRowsRange,
@@ -164,6 +166,57 @@ describe("heatmap utilities", () => {
       expect(getColor(800)).toBe("rgb(253, 231, 37)")
       expect(getColor(5000)).toBe("rgb(253, 231, 37)")
       expect(getColor(400)).not.toBe(getColor(800))
+    })
+  })
+
+  describe("custom palette and log colour scale", () => {
+    const blues = ["rgb(222, 235, 247)", "rgb(107, 174, 214)", "rgb(8, 48, 107)"]
+    const chartWith = attributes => makeTestChart({ attributes: { max: 100, ...attributes } }).chart
+
+    it("takes one palette for every theme, or one per theme", () => {
+      expect(getHeatmapPalette(chartWith({ heatmapPalette: blues }))).toEqual(blues)
+
+      const perTheme = { default: blues, dark: [...blues].reverse() }
+      expect(getHeatmapPalette(chartWith({ heatmapPalette: perTheme }))).toEqual(blues)
+      expect(getHeatmapPalette(chartWith({ heatmapPalette: perTheme, theme: "dark" }))).toEqual(
+        [...blues].reverse()
+      )
+      expect(
+        getHeatmapPalette(chartWith({ heatmapPalette: { default: blues }, theme: "dark" }))
+      ).toEqual(blues)
+    })
+
+    it("falls back to the default palette without at least two colours", () => {
+      expect(getHeatmapPalette(chartWith({}))).toEqual(heatmapDefaultPalette)
+      expect(getHeatmapPalette(chartWith({ heatmapPalette: ["#fff"] }))).toEqual(
+        heatmapDefaultPalette
+      )
+    })
+
+    it("maps counts onto the palette linearly by default", () => {
+      const getColor = makeGetColor(chartWith({ heatmapPalette: ["#000000", "#ffffff"] }))
+
+      expect(getColor(100)).toBe("rgb(255, 255, 255)")
+      expect(getColor(50)).toBe("rgb(128, 128, 128)")
+    })
+
+    it("places counts by their logarithm with the log scale", () => {
+      const getColor = makeGetColor(
+        chartWith({
+          max: 9999,
+          heatmapPalette: ["#ff0000", "#00ff00", "#0000ff"],
+          heatmapColorScale: "log",
+        })
+      )
+
+      expect(getColor(99)).toBe("rgb(0, 255, 0)")
+      expect(getColor(9999)).toBe("rgb(0, 0, 255)")
+      expect(getColor(0)).toBe("transparent")
+    })
+
+    it("applies the opacity to palette colours", () => {
+      const getColor = makeGetColor(chartWith({ heatmapPalette: blues }), 0.4)
+      expect(getColor(100)).toBe("rgba(8, 48, 107, 0.4)")
     })
   })
 
