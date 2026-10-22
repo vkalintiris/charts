@@ -1,5 +1,5 @@
 import { findHeatmapCell } from "@/helpers/heatmap"
-import makeHeatmapCell from "./heatmapCell"
+import makeHeatmapCell, { strokeCellInside } from "./heatmapCell"
 
 const themeAttrByFlavour = {
   hover: "themeCrosshair",
@@ -60,19 +60,11 @@ export const drawHoverCell = (chartUI, x, dimensionId) => {
   const getCell = makeHeatmapCell(dygraph, dygraph.layout_.points?.[0], {
     gap: chart.getAttribute("heatmapCellGap"),
   })
-  const { x: left, y, width, height } = getCell(dygraph.toDomXCoord(rowData[0]), cell.yIndex)
-
   ctx.save()
   ctx.setLineDash(hoverCellLineDash)
-  ctx.lineWidth = hoverCellLineWidth
   ctx.strokeStyle =
     chart.getAttribute("heatmapHoverColor") || chart.getThemeAttribute("themeCrosshair")
-  ctx.strokeRect(
-    left + hoverCellLineWidth / 2,
-    y + hoverCellLineWidth / 2,
-    Math.max(0, width - hoverCellLineWidth),
-    Math.max(0, height - hoverCellLineWidth)
-  )
+  strokeCellInside(ctx, getCell(dygraph.toDomXCoord(rowData[0]), cell.yIndex), hoverCellLineWidth)
   ctx.restore()
 }
 
