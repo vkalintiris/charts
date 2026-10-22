@@ -80,6 +80,31 @@ describe("line popover Dimensions", () => {
     expect(above[0]).toHaveTextContent("3")
   })
 
+  it("drops the anomaly and info columns of a heatmap with heatmapTooltipValueOnly", async () => {
+    const ids = ["1", "2", "3"]
+    const { chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        groupBy: ["dimension"],
+        selectedDimensions: [],
+        selectedLegendDimensions: [],
+        heatmapTooltipValueOnly: true,
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 3]])
+    chart.updateAttribute("hoverX", [1000, "2"])
+
+    renderWithChart(<Dimensions />, { chart })
+
+    const grid = screen.getByTestId("chartPopover-grid")
+    expect(grid).not.toHaveTextContent("Anomaly%")
+    expect(grid).not.toHaveTextContent("Info")
+    expect(window.getComputedStyle(grid).gridTemplateColumns).toMatch(
+      new RegExp(`px ${popoverGridColumns.value} ${popoverGridColumns.unit}$`)
+    )
+  })
+
   it("keeps generic more-values windowing for non-heatmap popovers", async () => {
     const ids = Array.from({ length: 12 }, (_, index) => `dim${index}`)
     const { chart } = makeTestChart({
