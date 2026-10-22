@@ -1,5 +1,5 @@
 import { act } from "@testing-library/react"
-import { makeTestChart, renderHookWithChart } from "@jest/testUtilities"
+import { makeTestChart, renderHookWithChart, loadHeatmapPayload } from "@jest/testUtilities"
 import {
   heatmapTypes,
   isHeatmap,
@@ -14,6 +14,7 @@ import {
   getHeatmapRowsRange,
   snapHeatmapRange,
   getHeatmapLabelOffset,
+  getMarkedHeatmapCell,
 } from "./heatmap"
 
 describe("heatmap utilities", () => {
@@ -343,6 +344,51 @@ describe("heatmap utilities", () => {
     it("puts labels of numeric buckets on the row's upper edge, others on its centre", () => {
       expect(getHeatmapLabelOffset({ getHeatmapSortedIds: () => ["1", "2"] })).toBe(0.5)
       expect(getHeatmapLabelOffset({ getHeatmapSortedIds: () => null })).toBe(0)
+    })
+  })
+
+  describe("getMarkedHeatmapCell", () => {
+    const ids = ["0", "1", "2", "3", "4", "5", "6"]
+    const rows = [
+      [0, 0, 1, 0, 2, 0, 0],
+      [0, 0, 0, 3, 1, 0, 0],
+    ]
+    const window = () => [1000, 2000]
+
+    const makeChart = async marked => {
+      const { chart } = makeTestChart({
+        attributes: {
+          chartType: "heatmap",
+          context: "prometheus.test.histogram",
+          groupBy: ["dimension"],
+          selectedLegendDimensions: [],
+          heatmapMarkedCell: marked,
+          viewDimensions: {
+            ids,
+            names: ids,
+            priorities: ids.map((_, index) => index),
+            units: ids.map(() => ""),
+            contexts: ids.map(() => ""),
+            grouped: ["dimension"],
+          },
+        },
+      })
+      await loadHeatmapPayload(chart, ids, rows, { timestamp: 1000 })
+      return chart
+    }
+
+    it("finds the payload row and the visible row of the marked cell", async () => {
+      const chart = await makeChart({ x: 2000, id: "3" })
+      expect(getMarkedHeatmapCell(chart, window)).toEqual({
+        row: 1,
+        yIndex: chart.getHeatmapYIndex("3"),
+      })
+    })
+
+    it("marks nothing without a cell, outside the window or on a hidden row", async () => {
+      expect(getMarkedHeatmapCell(await makeChart(null), window)).toBeNull()
+      expect(getMarkedHeatmapCell(await makeChart({ x: 9000, id: "3" }), window)).toBeNull()
+      expect(getMarkedHeatmapCell(await makeChart({ x: 2000, id: "0" }), window)).toBeNull()
     })
   })
 })
