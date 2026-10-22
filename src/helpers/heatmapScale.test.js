@@ -212,6 +212,11 @@ describe("heatmapScale", () => {
       expect(formatDurationValue(730, "d")).toBe("2 yr")
     })
 
+    it("moves to the next unit at its exact edge", () => {
+      expect(formatDurationValue(1000, "ns")).toBe("1 µs")
+      expect(formatDurationValue(60e9, "ns")).toBe("1 min")
+    })
+
     it("keeps zero, sub-nanosecond and negative values readable", () => {
       expect(formatDurationValue(0, "s")).toBe("0")
       expect(formatDurationValue(0.5, "ns")).toBe("0.5 ns")
@@ -231,11 +236,16 @@ describe("heatmapScale", () => {
       expect(resolveHeatmapScale("num", "seconds")).toEqual({ duration: "s" })
       expect(resolveHeatmapScale("binary", "µs")).toEqual({ duration: "us" })
       expect(resolveHeatmapScale(null, "min")).toEqual({ duration: "min" })
+      expect(resolveHeatmapScale(null, "mo")).toEqual({ duration: "mo" })
+      expect(resolveHeatmapScale(null, "years")).toEqual({ duration: "a" })
     })
 
     it("ignores units that are not durations", () => {
       expect(resolveHeatmapScale("num", "m")).toBe("num")
       expect(resolveHeatmapScale("binary", "By")).toBe("binary")
+      expect(resolveHeatmapScale("num", "mins")).toBe("num")
+      expect(resolveHeatmapScale("num", "yr")).toBe("num")
+      expect(resolveHeatmapScale("num", "Mo")).toBe("num")
     })
   })
 })

@@ -641,7 +641,7 @@ export default (chart, sdk) => {
 
   chart.onAttributeChange("dimensionsSort", chart.sortDimensions)
   chart.onAttributeChange("selectedLegendDimensions", updateVisibleDimensions)
-  chart.onAttributeChange("heatmapBucketUnit", () => chart.trigger("dimensionChanged"))
+  chart.onAttributeChange("heatmapBucketUnit", chart.sortDimensions)
 
   chart.updateColors = () => {
     let dimensionIds = chart.getAttribute("dimensionIds")
