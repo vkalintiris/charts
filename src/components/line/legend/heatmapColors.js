@@ -1,8 +1,8 @@
 import React, { useMemo } from "react"
 import styled from "styled-components"
 import { TextNano, Flex } from "@netdata/netdata-ui"
-import { useChart, useAttributeValue, useUnitSign } from "@/components/provider"
-import { getHeatmapPalette } from "@/helpers/heatmap"
+import { useChart, useAttributeValue, useUnitSign, usePayload } from "@/components/provider"
+import { getHeatmapPalette, getHeatmapMax } from "@/helpers/heatmap"
 
 const ColorScaleBar = styled(Flex).attrs({ width: "320px", height: "12px", round: true })`
   background: linear-gradient(to right, ${({ $colors }) => $colors.join(", ")});
@@ -10,7 +10,9 @@ const ColorScaleBar = styled(Flex).attrs({ width: "320px", height: "12px", round
 
 const HeatmapColorsLegend = () => {
   const chart = useChart()
-  const max = useAttributeValue("max")
+  usePayload()
+  useAttributeValue("max")
+  const max = getHeatmapMax(chart)
   const units = useUnitSign()
   const theme = useAttributeValue("theme")
   const palette = useAttributeValue("heatmapPalette")
