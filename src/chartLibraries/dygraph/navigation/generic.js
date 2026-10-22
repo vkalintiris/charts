@@ -157,7 +157,8 @@ export default chartUI => {
         if (touch) chartUI.trigger("click", touch, context.initialTouches?.[0]?.dataX, [])
         return
       }
-      chartUI.chart.updateAttribute("clickX", [context.initialTouches?.[0]?.dataX, null])
+      if (chartUI.chart.getAttribute("enabledClick") !== false)
+        chartUI.chart.updateAttribute("clickX", [context.initialTouches?.[0]?.dataX, null])
       return
     }
 
