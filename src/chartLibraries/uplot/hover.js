@@ -1,6 +1,5 @@
 import { isVisibleDimension } from "@/chartLibraries/helpers/dimensionVisibility"
-import { getRowPointValue } from "@/sdk/makeChart/getPointValue"
-import { getAnomalyColumns, getRowAnomalyRate } from "@/components/modern/anomaly"
+import { hasAnomalyAt, hasAnnotationAt } from "@/chartLibraries/helpers/rowMarks"
 import { getSeriesStackBounds, getStackBounds } from "./stacking"
 
 const anomalyBand = 15
@@ -89,20 +88,6 @@ const getNearestHeatmapBucket = (chart, self, top) => {
   return closestId
 }
 
-const hasAnnotation = (chart, idx) => {
-  const { all, point } = chart.getPayload()
-  const row = all?.[idx]
-  if (!row) return false
-
-  return getAnomalyColumns(chart).some(column => !!getRowPointValue(row, column, point, "pa"))
-}
-
-const hasAnomaly = (chart, idx) => {
-  const { all, point } = chart.getPayload()
-  const row = all?.[idx]
-  return !!row && getRowAnomalyRate(row, getAnomalyColumns(chart), point) > 0
-}
-
 export default chart => self => {
   const { top, idx } = self.cursor
   if (idx == null) return chart.getVisibleDimensionIds()?.[0]
@@ -114,13 +99,13 @@ export default chart => self => {
     if (
       chart.getAttribute("showAnnotations") &&
       top > self.over.clientHeight - annotationBand &&
-      (!heatmap || hasAnnotation(chart, idx))
+      (!heatmap || hasAnnotationAt(chart, idx))
     )
       return "ANNOTATIONS"
     if (
       chart.getAttribute("showAnomalies") &&
       top < anomalyBand &&
-      (!heatmap || hasAnomaly(chart, idx))
+      (!heatmap || hasAnomalyAt(chart, idx))
     )
       return "ANOMALY_RATE"
   }
