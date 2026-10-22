@@ -8,6 +8,7 @@ import makeResizeObserver from "@/helpers/makeResizeObserver"
 import limitRange from "@/helpers/limitRange"
 import {
   isHeatmap,
+  findHeatmapCell,
   getMarkedHeatmapCell,
   makeGetColor,
   withoutPrefix,
@@ -565,14 +566,13 @@ export default (sdk, chart) => {
     return [xAxis, yAxis]
   }
 
-  const isInWindow = (self, timestamp) => {
+  const getXRangeMs = self => {
     const { min, max } = self.scales.x
-    return isInXRange(
-      timestamp,
-      min == null || max == null ? null : [min * 1000, max * 1000],
-      chart.getAttribute("viewUpdateEvery")
-    )
+    return min == null || max == null ? null : [min * 1000, max * 1000]
   }
+
+  const isInWindow = (self, timestamp) =>
+    isInXRange(timestamp, getXRangeMs(self), chart.getAttribute("viewUpdateEvery"))
 
   const drawVerticalLine = (self, ctx, dimensions, color, dash) => {
     if (!Array.isArray(dimensions)) return
@@ -880,11 +880,6 @@ export default (sdk, chart) => {
     ctx.restore()
   }
 
-  const getXRangeMs = self => {
-    const { min, max } = self.scales.x
-    return min == null || max == null ? null : [min * 1000, max * 1000]
-  }
-
   const strokeHeatmapCell = (self, ctx, x, yIndex, { color, lineWidth, dash = [] }) => {
     const pxRatio = getPxRatio()
     const cell = makeHeatmapCell(self, { gap: chart.getAttribute("heatmapCellGap") })(x, yIndex)
@@ -924,14 +919,11 @@ export default (sdk, chart) => {
     if (!Array.isArray(hoverX)) return
 
     const [timestamp, id] = hoverX
-    if (timestamp == null || !isInWindow(self, timestamp)) return
+    const cell = findHeatmapCell(chart, timestamp, id, () => getXRangeMs(self))
+    const x = cell && self.data[0]?.[cell.row]
+    if (x == null) return
 
-    const yIndex = chart.getHeatmapYIndex(id)
-    const row = chart.getClosestRow(timestamp)
-    const x = row === -1 ? null : self.data[0]?.[row]
-    if (yIndex === -1 || x == null) return
-
-    strokeHeatmapCell(self, ctx, x, yIndex, {
+    strokeHeatmapCell(self, ctx, x, cell.yIndex, {
       color: chart.getAttribute("heatmapHoverColor") || chart.getThemeAttribute("themeCrosshair"),
       lineWidth: hoverCellLineWidth,
       dash: hoverCellLineDash,

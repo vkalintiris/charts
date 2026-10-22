@@ -26,16 +26,25 @@ export const getHeatmapLabelOffset = chart => (chart.getHeatmapSortedIds?.() ? 0
 
 export const fitHeatmapGap = (size, gap) => (size >= 2 * gap + 1 ? gap : 0)
 
-export const getMarkedHeatmapCell = (chart, getXRange) => {
-  const marked = chart.getAttribute("heatmapMarkedCell")
-  if (!marked) return null
-  if (!isInXRange(marked.x, getXRange(), chart.getAttribute("viewUpdateEvery"))) return null
+export const findHeatmapCell = (chart, x, id, getXRange) => {
+  if (x == null) return null
 
-  const yIndex = chart.getHeatmapYIndex(marked.id)
+  const step = chart.getAttribute("viewUpdateEvery")
+  if (!isInXRange(x, getXRange(), step)) return null
+
+  const yIndex = chart.getHeatmapYIndex(id)
   if (yIndex === -1) return null
 
-  const row = chart.getClosestRow(marked.x)
-  return row === -1 ? null : { row, yIndex }
+  const row = chart.getClosestRow(x)
+  const rowX = row === -1 ? null : chart.getPayload().data[row]?.[0]
+  if (rowX == null || Math.abs(rowX - x) > ((step || 1) * 1000) / 2) return null
+
+  return { row, yIndex }
+}
+
+export const getMarkedHeatmapCell = (chart, getXRange) => {
+  const marked = chart.getAttribute("heatmapMarkedCell")
+  return marked ? findHeatmapCell(chart, marked.x, marked.id, getXRange) : null
 }
 
 const regex = /(.+)_(-?\d+?\.?(\d+)?|\+[Ii]nf)$/

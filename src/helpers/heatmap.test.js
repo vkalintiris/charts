@@ -405,6 +405,12 @@ describe("heatmap utilities", () => {
       })
     })
 
+    it("marks nothing for a time more than half a step from every column", async () => {
+      expect(
+        getMarkedHeatmapCell(await makeChart({ x: 2900, id: "3" }), () => [1000, 3000])
+      ).toBeNull()
+    })
+
     it("marks nothing without a cell, outside the window or on a hidden row", async () => {
       expect(getMarkedHeatmapCell(await makeChart(null), window)).toBeNull()
       expect(getMarkedHeatmapCell(await makeChart({ x: 9000, id: "3" }), window)).toBeNull()

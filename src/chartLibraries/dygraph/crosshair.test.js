@@ -303,13 +303,18 @@ describe("crosshair", () => {
       mockDygraph.layout_ = { points: [[{ canvasx: 100 }, { canvasx: 120 }]] }
       mockDygraph.toDomYCoord = index => 300 - index * 40
       mockDygraph.toDomXCoord.mockReturnValue(110)
+      mockDygraph.xAxisRange = () => [1617946860000, 1617947040000]
+      jest.spyOn(chart, "getClosestRow").mockImplementation(timestamp => {
+        const rows = chart.getPayload().data.map(([time]) => Math.abs(time - timestamp))
+        return rows.indexOf(Math.min(...rows))
+      })
       jest.spyOn(chart, "getHeatmapYIndex").mockImplementation(id => ["a", "b", "c"].indexOf(id))
     })
 
     it("outlines the hovered cell with a dashed line inside its edges", () => {
       jest.spyOn(chart, "getThemeAttribute").mockReturnValue("#536775")
 
-      drawHoverCell(mockChartUI, 0, "b")
+      drawHoverCell(mockChartUI, 1617946860000, "b")
 
       expect(mockCtx.setLineDash).toHaveBeenCalledWith([3, 3])
       expect(mockCtx.lineWidth).toBe(1.5)
@@ -322,13 +327,20 @@ describe("crosshair", () => {
         .spyOn(chart, "getAttribute")
         .mockImplementation(name => (name === "heatmapHoverColor" ? "#F28E2B" : undefined))
 
-      drawHoverCell(mockChartUI, 0, "b")
+      drawHoverCell(mockChartUI, 1617946860000, "b")
 
       expect(mockCtx.strokeStyle).toBe("#F28E2B")
     })
 
     it("draws nothing for a row that is not a visible heatmap row", () => {
-      drawHoverCell(mockChartUI, 0, "series-from-another-chart")
+      drawHoverCell(mockChartUI, 1617946860000, "series-from-another-chart")
+
+      expect(mockCtx.strokeRect).not.toHaveBeenCalled()
+    })
+
+    it("draws nothing for a time outside the window or between columns", () => {
+      drawHoverCell(mockChartUI, 1617947100000, "b")
+      drawHoverCell(mockChartUI, 1617946890000, "b")
 
       expect(mockCtx.strokeRect).not.toHaveBeenCalled()
     })
