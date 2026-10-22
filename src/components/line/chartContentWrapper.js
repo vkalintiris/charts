@@ -12,6 +12,7 @@ import Skeleton from "./skeleton"
 import Overlays from "./overlays"
 import { Processing } from "./overlays/proceeded"
 import cursorStyle from "@/components/helpers/cursorStyle"
+import { useIsHeatmap } from "@/helpers/heatmap"
 import { useInModernTile } from "@/components/modern/tile/context"
 
 const chartLibraries = {
@@ -141,6 +142,8 @@ export const ContentWrapper = props => (
 export const Container = props => {
   const chartLibrary = useAttributeValue("chartLibrary")
   const navigation = useAttributeValue("navigation")
+  const heatmap = useIsHeatmap()
+  const cellClick = useAttributeValue("heatmapCellClick")
 
   return (
     <StyledContainer
@@ -152,6 +155,7 @@ export const Container = props => {
       width="100%"
       overflow="hidden"
       navigation={navigation}
+      $cellClick={heatmap && !!cellClick}
       {...props}
     />
   )
