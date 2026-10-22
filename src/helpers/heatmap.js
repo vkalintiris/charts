@@ -74,8 +74,11 @@ export const getHeatmapPalette = chart => {
   const colors = Array.isArray(palette)
     ? palette
     : palette?.[chart.getAttribute("theme")] || palette?.default
+  const valid = Array.isArray(colors)
+    ? colors.filter(value => typeof value === "string" && !!parseColor(value))
+    : []
 
-  return Array.isArray(colors) && colors.length > 1 ? colors : heatmapDefaultPalette
+  return valid.length > 1 ? valid : heatmapDefaultPalette
 }
 
 export const isLogColorScale = chart => chart.getAttribute("heatmapColorScale") === "log"
@@ -108,7 +111,7 @@ export const makeGetColor = (chart, opacity = 1) => {
   }
 
   const position = isLogColorScale(chart)
-    ? value => Math.log10(value + 1) / Math.log10(max + 1)
+    ? value => Math.log10(Math.max(value, 0) + 1) / Math.log10(max + 1)
     : value => value / max
   const getScaleColor = scaleLinear()
     .domain(colors.map((_, index) => index / (colors.length - 1)))
