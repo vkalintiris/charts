@@ -5,10 +5,7 @@ import Color, { ColorBar } from "@/components/line/dimensions/color"
 import Name from "@/components/line/dimensions/name"
 import { Value as UnitValue } from "@/components/line/dimensions/units"
 import Value, { Value as ValuePart } from "@/components/line/dimensions/value"
-import {
-  useLatestDisplayValueWithUnit,
-  useVisibleDimensionId,
-} from "@/components/provider"
+import { useLatestDisplayValueWithUnit, useVisibleDimensionId } from "@/components/provider"
 import { labels as annotationLabels } from "@/helpers/annotations"
 import { useIsHeatmap } from "@/helpers/heatmap"
 import { rowFlavours } from "./dimensions"
@@ -72,9 +69,7 @@ const ValueWithUnits = ({ id, visible, ...rest }) => {
   return (
     <>
       <PlainValue {...rest}>{convertedValue}</PlainValue>
-      <UnitCell>
-        {!isHeatmap && convertedUnit && <UnitValue>{convertedUnit}</UnitValue>}
-      </UnitCell>
+      <UnitCell>{!isHeatmap && convertedUnit && <UnitValue>{convertedUnit}</UnitValue>}</UnitCell>
     </>
   )
 }
@@ -97,9 +92,20 @@ const AnnotationsValue = ({ children: annotations, showFull, ...rest }) => (
   </Flex>
 )
 
-const Dimension = ({ id, strong, rowFlavour }) => {
+const Dimension = ({ id, strong, hoverColor, rowFlavour }) => {
   const visible = useVisibleDimensionId(id)
   const isHeatmap = useIsHeatmap()
+  const highlighted = strong && !!hoverColor
+  const name = (
+    <Name
+      padding={[1, 2]}
+      flex
+      id={id}
+      strong={strong}
+      noTooltip
+      color={strong ? "textFocus" : "text"}
+    />
+  )
 
   return (
     <GridRow opacity={visible ? null : "weak"}>
@@ -108,17 +114,17 @@ const Dimension = ({ id, strong, rowFlavour }) => {
           id={id}
           valueKey={rowValueKeys[rowFlavour] || rowValueKeys.default}
           height="18px"
+          highlightColor={highlighted ? hoverColor : undefined}
         >
           {!isHeatmap && <Color id={id} />}
         </ColorBackground>
-        <Name
-          padding={[1, 2]}
-          flex
-          id={id}
-          strong={strong}
-          noTooltip
-          color={strong ? "textFocus" : "text"}
-        />
+        {highlighted ? (
+          <Flex position="relative" flex overflow="hidden" data-testid="chartPopover-nameAboveBar">
+            {name}
+          </Flex>
+        ) : (
+          name
+        )}
       </DimensionNameCell>
       <ValueWithUnits
         id={id}
