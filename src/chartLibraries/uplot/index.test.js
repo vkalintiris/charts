@@ -731,6 +731,32 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
+  it("outlines the marked cell on the overlay and clears it with null", async () => {
+    const { chart, instance, element } = await mountHeatmap()
+
+    instance.mount(element)
+    await Promise.resolve()
+    await Promise.resolve()
+
+    const overlay = element.querySelector(".netdata-crosshair-overlay").getContext("2d")
+    const strokes = []
+    const strokeRect = jest.spyOn(overlay, "strokeRect").mockImplementation(function () {
+      strokes.push(this.lineWidth)
+    })
+    const [x] = chart.getPayload().data[1]
+    const id = chart.getVisibleHeatmapIds()[2]
+
+    chart.updateAttribute("heatmapMarkedCell", { x, id })
+    expect(strokes).toEqual([2])
+
+    strokeRect.mockClear()
+    chart.updateAttribute("heatmapMarkedCell", null)
+    expect(strokeRect).not.toHaveBeenCalled()
+
+    strokeRect.mockRestore()
+    cleanup(instance, element)
+  })
+
   it("redraws when the cell gap or the colours change", async () => {
     const { chart, instance, element } = await mountHeatmap()
 

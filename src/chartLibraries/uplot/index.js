@@ -8,6 +8,7 @@ import makeResizeObserver from "@/helpers/makeResizeObserver"
 import limitRange from "@/helpers/limitRange"
 import {
   isHeatmap,
+  getMarkedHeatmapCell,
   makeGetColor,
   withoutPrefix,
   getHeatmapRowsRange,
@@ -68,6 +69,7 @@ const xAxisGap = 3
 const rightPad = 0
 const xTickSpace = 80
 const heatmapPixelsPerLabel = 15
+const markedCellLineWidth = 2
 
 const lineWidth = 2
 const areaLineWidth = 2
@@ -876,6 +878,39 @@ export default (sdk, chart) => {
     ctx.restore()
   }
 
+  const getXRangeMs = self => {
+    const { min, max } = self.scales.x
+    return min == null || max == null ? null : [min * 1000, max * 1000]
+  }
+
+  const drawMarkedCell = (self, ctx) => {
+    if (!isHeatmap(chart)) return
+
+    const marked = getMarkedHeatmapCell(chart, () => getXRangeMs(self))
+    const x = marked && self.data[0]?.[marked.row]
+    if (x == null) return
+
+    const cell = makeHeatmapCell(self, { gap: chart.getAttribute("heatmapCellGap") })(
+      x,
+      marked.yIndex
+    )
+    const lineWidth = markedCellLineWidth * getPxRatio()
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(self.bbox.left, self.bbox.top, self.bbox.width, self.bbox.height)
+    ctx.clip()
+    ctx.strokeStyle = chart.getThemeAttribute("themeHeatmapMarkedCell")
+    ctx.lineWidth = lineWidth
+    ctx.strokeRect(
+      cell.x + lineWidth / 2,
+      cell.y + lineWidth / 2,
+      Math.max(0, cell.width - lineWidth),
+      Math.max(0, cell.height - lineWidth)
+    )
+    ctx.restore()
+  }
+
   const renderCrosshair = () => {
     if (!u || !overlayCtx) return
 
@@ -884,6 +919,7 @@ export default (sdk, chart) => {
     const hoverX = chart.getAttribute("hoverX")
     const clickX = chart.getAttribute("clickX")
 
+    drawMarkedCell(u, overlayCtx)
     drawVerticalLine(u, overlayCtx, hoverX, chart.getThemeAttribute("themeCrosshair"), [5, 5])
     drawVerticalLine(u, overlayCtx, clickX, chart.getThemeAttribute("themeNetdata"), [2, 2])
     drawHoverDots(u, overlayCtx, hoverX)
@@ -1704,6 +1740,7 @@ export default (sdk, chart) => {
       chart.onAttributeChange("heatmapBucketUnit", () => u && u.redraw(false, true)),
       chart.onAttributeChange("heatmapCellGap", () => u && u.redraw(false, false)),
       chart.onAttributeChange("heatmapPalette", () => u && u.redraw(false, false)),
+      chart.onAttributeChange("heatmapMarkedCell", () => renderCrosshair()),
       chart.onAttributeChange("heatmapColorScale", () => u && u.redraw(false, false)),
       chart.onAttributeChange("anomalySpotlight", () => u && u.redraw(false, false)),
       chart.onAttributeChange("unitsConversionPrefix", onUnitsConversionChange),

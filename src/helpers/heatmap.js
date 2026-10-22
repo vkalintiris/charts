@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import { scaleLinear } from "d3-scale"
 import { color as parseColor } from "d3"
 import { useChart, useAttributeValue } from "@/components/provider"
+import isInXRange from "@/helpers/isInXRange"
 
 export const heatmapTypes = {
   default: "default",
@@ -22,6 +23,18 @@ export const getHeatmapRowsRange = count => [-0.5, Math.max(count, 1) - 0.5]
 export const snapHeatmapRange = ([min, max]) => [Math.round(min) - 0.5, Math.round(max) + 0.5]
 
 export const getHeatmapLabelOffset = chart => (chart.getHeatmapSortedIds?.() ? 0.5 : 0)
+
+export const getMarkedHeatmapCell = (chart, getXRange) => {
+  const marked = chart.getAttribute("heatmapMarkedCell")
+  if (!marked) return null
+  if (!isInXRange(marked.x, getXRange(), chart.getAttribute("viewUpdateEvery"))) return null
+
+  const yIndex = chart.getHeatmapYIndex(marked.id)
+  if (yIndex === -1) return null
+
+  const row = chart.getClosestRow(marked.x)
+  return row === -1 ? null : { row, yIndex }
+}
 
 const regex = /(.+)_(-?\d+?\.?(\d+)?|\+[Ii]nf)$/
 

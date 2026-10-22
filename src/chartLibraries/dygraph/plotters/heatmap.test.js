@@ -174,6 +174,36 @@ describe("heatmap plotter", () => {
     expect(ctx.fillRect).not.toHaveBeenCalled()
   })
 
+  it("outlines the marked cell inside its edges, after every cell", () => {
+    chartUI.chart.getAttribute.mockImplementation(attr => {
+      if (attr === "max") return 100
+      if (attr === "heatmapMarkedCell") return { x: 2000, id: "dim2" }
+      return undefined
+    })
+    jest.spyOn(chartUI.chart, "getClosestRow").mockReturnValue(1)
+    jest.spyOn(chartUI.chart, "getPayload").mockReturnValue({ data: [[1000], [2000], [3000]] })
+    jest.spyOn(chartUI.chart, "getThemeAttribute").mockReturnValue("#F28E2B")
+    plotter.allSeriesPoints = [
+      [{ canvasx: 10 }, { canvasx: 20 }, { canvasx: 30 }],
+      [{ canvasx: 10 }, { canvasx: 20 }, { canvasx: 30 }],
+      [{ canvasx: 10 }, { canvasx: 20 }, { canvasx: 30 }],
+    ]
+    plotter.dygraph.xAxisRange = () => [1000, 3000]
+    plotter.dygraph.toDomXCoord = x => x / 100
+    ctx.save = jest.fn()
+    ctx.restore = jest.fn()
+
+    heatmapPlotter(chartUI)(plotter)
+
+    expect(ctx.strokeRect).toHaveBeenCalledTimes(1)
+    expect(ctx.strokeRect).toHaveBeenCalledWith(16, 61, 8, 18)
+    expect(ctx.strokeStyle).toBe("#F28E2B")
+    expect(ctx.lineWidth).toBe(2)
+    expect(ctx.fillRect.mock.invocationCallOrder.at(-1)).toBeLessThan(
+      ctx.strokeRect.mock.invocationCallOrder[0]
+    )
+  })
+
   it("draws a one-column window as a single plot-wide cell", () => {
     plotter.allSeriesPoints = [[{ canvasx: 60 }]]
     plotter.dygraph.layout_.setNames = ["dim1"]

@@ -124,6 +124,7 @@ export default {
   heatmapPalette: null,
   heatmapColorScale: "linear",
   heatmapCellClick: false,
+  heatmapMarkedCell: null,
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,
@@ -212,6 +213,7 @@ export default {
 
   themeGridColor: ["#E4E8E8", "#212727"],
   themeCrosshair: ["#536775", "#536775"],
+  themeHeatmapMarkedCell: ["#F28E2B", "#F28E2B"],
 
   themeTrackColor: ["#DBE1E1", "#353F3F"],
   themeScaleColor: ["#F7F8F8", "#2B3136"],

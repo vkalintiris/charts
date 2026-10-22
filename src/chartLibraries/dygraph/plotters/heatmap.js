@@ -1,5 +1,17 @@
-import { makeGetColor } from "@/helpers/heatmap"
+import { makeGetColor, getMarkedHeatmapCell } from "@/helpers/heatmap"
 import makeHeatmapCell from "../heatmapCell"
+
+const markedLineWidth = 2
+
+const strokeInside = (ctx, { x, y, width, height }, lineWidth) => {
+  ctx.lineWidth = lineWidth
+  ctx.strokeRect(
+    x + lineWidth / 2,
+    y + lineWidth / 2,
+    Math.max(0, width - lineWidth),
+    Math.max(0, height - lineWidth)
+  )
+}
 
 export default chartUI => plotter => {
   if (!chartUI) return
@@ -32,4 +44,13 @@ export default chartUI => plotter => {
       ctx.fillRect(x, y, width, height)
     })
   })
+
+  const marked = getMarkedHeatmapCell(chartUI.chart, () => g.xAxisRange())
+  const markedX = marked && chartUI.chart.getPayload().data[marked.row]?.[0]
+  if (markedX == null) return
+
+  ctx.save()
+  ctx.strokeStyle = chartUI.chart.getThemeAttribute("themeHeatmapMarkedCell")
+  strokeInside(ctx, getCell(g.toDomXCoord(markedX), marked.yIndex), markedLineWidth)
+  ctx.restore()
 }
