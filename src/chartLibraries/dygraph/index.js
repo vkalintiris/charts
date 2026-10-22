@@ -2,7 +2,7 @@ import Dygraph from "dygraphs"
 import makeChartUI from "@/sdk/makeChartUI"
 import makeResizeObserver from "@/helpers/makeResizeObserver"
 import makeExecuteLatest from "@/helpers/makeExecuteLatest"
-import { isHeatmap } from "@/helpers/heatmap"
+import { isHeatmap, getHeatmapRowsRange, snapHeatmapRange } from "@/helpers/heatmap"
 import {
   makeLinePlotter,
   makeStackedAreaPlotter,
@@ -228,7 +228,7 @@ export default (sdk, chart) => {
         const [min, max] = staticValueRange
         updateOptions({
           valueRange: isHeatmap(attributes.chartType)
-            ? [Math.ceil(min), Math.ceil(max)]
+            ? snapHeatmapRange([min, max])
             : attributes.getValueRange(chart, { dygraph: true }),
         })
       }),
@@ -455,11 +455,11 @@ export default (sdk, chart) => {
       file: isEmpty ? [[0]] : data,
       labels: isEmpty ? ["X"] : labels,
       dateWindow,
-      valueRange: staticValueRange
+      valueRange: isHeatmap(chartType)
         ? staticValueRange
-        : isHeatmap(chartType)
-          ? [0, heatmapIds.length]
-          : getValueRange(chart, { dygraph: true }),
+          ? snapHeatmapRange(staticValueRange)
+          : getHeatmapRowsRange(heatmapIds.length)
+        : staticValueRange || getValueRange(chart, { dygraph: true }),
     }
   }
 

@@ -413,6 +413,44 @@ describe("dygraphChart", () => {
     expect(yLabels(calls[calls.length - 1][0])).toEqual(["1Ki", "4Mi", "+Inf"])
   })
 
+  it("frames whole heatmap rows and snaps a y-zoom to row edges", async () => {
+    const ids = ["0", "1", "2", "3", "4", "5", "6"]
+    const { sdk, chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        chartLibrary: "dygraph",
+        context: "prometheus.test.histogram",
+        groupBy: ["dimension"],
+        selectedLegendDimensions: [],
+        viewDimensions: {
+          ids,
+          names: ids,
+          priorities: ids.map((_, index) => index),
+          units: ids.map(() => ""),
+          contexts: ids.map(() => ""),
+          grouped: ["dimension"],
+        },
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 1, 3, 2, 1, 1]], { timestamp: 1617946860000 })
+    chart.getDateWindow = () => [1617946860000, 1617947750000]
+    chart.formatXAxis = x => x.toString()
+    chart.getThemeAttribute = () => "#333"
+    chart.getUnitSign = () => ""
+
+    const instance = dygraphChart(sdk, chart)
+    instance.mount(document.createElement("div"))
+
+    const Dygraph = require("dygraphs")
+    expect(Dygraph.mock.calls[Dygraph.mock.calls.length - 1][2].valueRange).toEqual([-0.5, 6.5])
+
+    chart.updateAttribute("staticValueRange", [1.3, 3.7])
+
+    const { calls } = mockDygraph.updateOptions.mock
+    expect(calls[calls.length - 1][0].valueRange).toEqual([0.5, 4.5])
+  })
+
   it("uses cropped heatmap bucket count for y-axis range", async () => {
     const ids = ["0", "1", "2", "3", "4", "5", "6"]
     const { sdk, chart } = makeTestChart({
@@ -445,7 +483,7 @@ describe("dygraphChart", () => {
     const Dygraph = require("dygraphs")
     const options = Dygraph.mock.calls[Dygraph.mock.calls.length - 1][2]
 
-    expect(options.valueRange).toEqual([0, 5])
+    expect(options.valueRange).toEqual([-0.5, 4.5])
   })
 
   it("returns axis range from dygraph", () => {

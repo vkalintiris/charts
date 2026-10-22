@@ -16,6 +16,10 @@ export const useIsHeatmap = () => useAttributeValue("chartType") === "heatmap"
 export const isIncremental = chart =>
   isHeatmap(chart) && chart.getAttribute("heatmapType") === heatmapTypes.incremental
 
+export const getHeatmapRowsRange = count => [-0.5, Math.max(count, 1) - 0.5]
+
+export const snapHeatmapRange = ([min, max]) => [Math.round(min) - 0.5, Math.round(max) + 0.5]
+
 const regex = /(.+)_(-?\d+?\.?(\d+)?|\+[Ii]nf)$/
 
 export const heatmapOrChartType = (ids, chartType) =>
