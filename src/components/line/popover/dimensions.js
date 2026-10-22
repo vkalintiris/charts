@@ -62,7 +62,8 @@ const Dimensions = () => {
   const [x, row] = useAttributeValue("hoverX") || emptyArray
   const isHeatmap = chart.getAttribute("chartType") === "heatmap"
   const hoverColor = useAttributeValue("heatmapHoverColor")
-  const valueOnly = isHeatmap && !!useAttributeValue("heatmapTooltipValueOnly")
+  const heatmapValueOnly = useAttributeValue("heatmapTooltipValueOnly")
+  const valueOnly = isHeatmap && !!heatmapValueOnly
 
   const [from, to, total, ids] = useMemo(() => {
     const index = chart.getClosestRow(x)
