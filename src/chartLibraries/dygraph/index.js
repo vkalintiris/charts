@@ -171,22 +171,31 @@ export default (sdk, chart) => {
         ? chart.getClosestRow(dimensions[0])
         : -1
 
+    const hasHoverCell = () => isHeatmap(chart) && !!chart.getAttribute("heatmapHoverCell")
+
+    const redrawInteraction = () => {
+      clearInteractionLayer(instance)
+
+      const hoverX = chart.getAttribute("hoverX")
+      const row = Array.isArray(hoverX) ? chart.getClosestRow(hoverX[0]) : -1
+
+      if (row === -1) dygraph.setSelection()
+      else crosshair(instance, row)
+
+      const clickRow = getClickRow(chart.getAttribute("clickX"))
+      if (clickRow !== -1) drawCrosshairLine(instance, clickRow, "click")
+      if (row !== -1 && hasHoverCell()) drawHoverCell(instance, hoverX[0], hoverX[1])
+    }
+
     listeners = [
       chartUI.on("resize", () => dygraph.resize()),
       chart.onAttributeChange("hoverX", dimensions => {
+        if (hasHoverCell()) return redrawInteraction()
+
         const row = Array.isArray(dimensions) ? chart.getClosestRow(dimensions[0]) : -1
-        const hoverCell = isHeatmap(chart) && chart.getAttribute("heatmapHoverCell")
+        if (row === -1) return dygraph.setSelection()
 
-        if (hoverCell) clearInteractionLayer(instance)
-
-        if (row === -1) dygraph.setSelection()
-        else crosshair(instance, row)
-
-        if (!hoverCell) return
-
-        const clickRow = getClickRow(chart.getAttribute("clickX"))
-        if (clickRow !== -1) drawCrosshairLine(instance, clickRow, "click")
-        if (row !== -1) drawHoverCell(instance, dimensions[0], dimensions[1])
+        crosshair(instance, row)
       }),
       chart.onAttributeChange("clickX", dimensions => {
         const row = getClickRow(dimensions)
@@ -250,7 +259,12 @@ export default (sdk, chart) => {
       chart.onAttributeChange("timezone", () => updateOptions({})),
       chart.onAttributeChange("heatmapCellGap", () => updateOptions({})),
       chart.onAttributeChange("heatmapPalette", () => updateOptions({})),
-      chart.onAttributeChange("heatmapMarkedCell", () => updateOptions({})),
+      chart.onAttributeChange("heatmapMarkedCell", () => {
+        updateOptions({})
+        redrawInteraction()
+      }),
+      chart.onAttributeChange("heatmapHoverCell", redrawInteraction),
+      chart.onAttributeChange("heatmapHoverColor", redrawInteraction),
       chart.onAttributeChange("heatmapColorScale", () => updateOptions({})),
       chart.onAttributeChange("heatmapKeepEmptyRows", () => {
         if (chart.getAttribute("processing")) return
