@@ -46,18 +46,19 @@ export const makeGetColor = (chart, opacity = 1) => {
     return value => (value == null || value === 0 ? "transparent" : colors[0])
   }
 
-  const step = max / (colors.length - 1)
   const getLinearColor = scaleLinear()
-    .domain(Array.from({ length: colors.length - 1 }, (_, i) => i * step))
+    .domain(colors.map((_, index) => (index * max) / (colors.length - 1)))
     .range(colors)
+    .clamp(true)
 
   return value => (value == null || value === 0 ? "transparent" : getLinearColor(value))
 }
 
 export const useGetColor = (opacity = 1) => {
   const chart = useChart()
+  const max = useAttributeValue("max")
 
-  return useMemo(() => makeGetColor(chart, opacity), [opacity])
+  return useMemo(() => makeGetColor(chart, opacity), [chart, opacity, max])
 }
 
 export const withoutPrefix = label =>
