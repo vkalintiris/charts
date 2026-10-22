@@ -252,7 +252,7 @@ export default (sdk, chart) => {
         const [min, max] = staticValueRange
         updateOptions({
           valueRange: isHeatmap(attributes.chartType)
-            ? snapHeatmapRange([min, max])
+            ? snapHeatmapRange([min, max], chart.getVisibleHeatmapIds().length)
             : attributes.getValueRange(chart, { dygraph: true }),
         })
       }),
@@ -496,7 +496,7 @@ export default (sdk, chart) => {
       dateWindow,
       valueRange: isHeatmap(chartType)
         ? staticValueRange
-          ? snapHeatmapRange(staticValueRange)
+          ? snapHeatmapRange(staticValueRange, heatmapIds.length)
           : getHeatmapRowsRange(heatmapIds.length)
         : staticValueRange || getValueRange(chart, { dygraph: true }),
     }

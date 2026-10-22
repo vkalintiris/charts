@@ -329,9 +329,10 @@ export default (sdk, chart) => {
 
   const getHeatmapValueRange = () => {
     const staticValueRange = chart.getAttribute("staticValueRange")
-    if (staticValueRange) return snapHeatmapRange(staticValueRange)
+    const count = chart.getVisibleHeatmapIds().length
+    if (staticValueRange) return snapHeatmapRange(staticValueRange, count)
 
-    return getHeatmapRowsRange(chart.getVisibleHeatmapIds().length)
+    return getHeatmapRowsRange(count)
   }
 
   const getEmptyValueRange = () => {
