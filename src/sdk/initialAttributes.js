@@ -130,6 +130,7 @@ export default {
   heatmapTooltipHideZeros: false,
   heatmapTooltipTopFirst: false,
   heatmapTooltipValueOnly: false,
+  heatmapLegend: "full",
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,
