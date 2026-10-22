@@ -455,6 +455,44 @@ describe("dygraphChart", () => {
     expect(calls.length).toBe(before + 1)
   })
 
+  it("re-ranges the y axis over every row when empty rows are kept", async () => {
+    const ids = ["0", "1", "2", "3", "4", "5", "6"]
+    const { sdk, chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        chartLibrary: "dygraph",
+        context: "prometheus.test.histogram",
+        groupBy: ["dimension"],
+        selectedLegendDimensions: [],
+        viewDimensions: {
+          ids,
+          names: ids,
+          priorities: ids.map((_, index) => index),
+          units: ids.map(() => ""),
+          contexts: ids.map(() => ""),
+          grouped: ["dimension"],
+        },
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[0, 0, 1, 0, 2, 0, 0]], { timestamp: 1617946860000 })
+    chart.getDateWindow = () => [1617946860000, 1617947750000]
+    chart.formatXAxis = x => x.toString()
+    chart.getThemeAttribute = () => "#333"
+    chart.getUnitSign = () => ""
+
+    const instance = dygraphChart(sdk, chart)
+    instance.mount(document.createElement("div"))
+
+    const Dygraph = require("dygraphs")
+    expect(Dygraph.mock.calls[Dygraph.mock.calls.length - 1][2].valueRange).toEqual([-0.5, 4.5])
+
+    chart.updateAttribute("heatmapKeepEmptyRows", true)
+
+    const { calls } = mockDygraph.updateOptions.mock
+    expect(calls[calls.length - 1][0].valueRange).toEqual([-0.5, 6.5])
+  })
+
   it("uses cropped heatmap bucket count for y-axis range", async () => {
     const ids = ["0", "1", "2", "3", "4", "5", "6"]
     const { sdk, chart } = makeTestChart({

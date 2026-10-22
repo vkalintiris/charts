@@ -1653,6 +1653,11 @@ export default (sdk, chart) => {
         u.setData(u.data, true)
         renderCrosshair()
       }),
+      chart.onAttributeChange("heatmapKeepEmptyRows", () => {
+        if (!u) return
+        u.setData(u.data, true)
+        renderCrosshair()
+      }),
       chart.onAttributeChange("timezone", () => u && u.redraw()),
       chart.onAttributeChange("heatmapBucketUnit", () => u && u.redraw(false, true)),
       chart.onAttributeChange("heatmapCellGap", () => u && u.redraw(false, false)),

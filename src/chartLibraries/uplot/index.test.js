@@ -679,6 +679,20 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
+  it("re-ranges the y axis over every row when empty rows are kept", async () => {
+    const { chart, instance, element } = await mountHeatmap()
+
+    instance.mount(element)
+    const u = instance.getUPlot()
+    const cropped = chart.getVisibleHeatmapIds().length
+
+    chart.updateAttribute("heatmapKeepEmptyRows", true)
+    expect(u.scales.y.range(u, 0, 100)).toEqual([-0.5, heatmapIds.length - 0.5])
+    expect(cropped).toBeLessThan(heatmapIds.length)
+
+    cleanup(instance, element)
+  })
+
   it("redraws when the cell gap changes", async () => {
     const { chart, instance, element } = await mountHeatmap()
 

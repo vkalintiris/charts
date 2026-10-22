@@ -119,6 +119,7 @@ export default {
   secondsAsTime: true,
   heatmapBucketUnit: null,
   heatmapCellGap: 0,
+  heatmapKeepEmptyRows: false,
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,
