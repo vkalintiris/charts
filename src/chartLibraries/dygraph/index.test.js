@@ -457,6 +457,75 @@ describe("dygraphChart", () => {
     expect(calls.length).toBe(before + 3)
   })
 
+  it("outlines the hovered heatmap cell and leaves no trail behind", async () => {
+    const ids = ["0", "1", "2", "3", "4", "5", "6"]
+    const { sdk, chart } = makeTestChart({
+      attributes: {
+        chartType: "heatmap",
+        chartLibrary: "dygraph",
+        context: "prometheus.test.histogram",
+        groupBy: ["dimension"],
+        selectedLegendDimensions: [],
+        heatmapHoverCell: true,
+        heatmapKeepEmptyRows: true,
+        viewDimensions: {
+          ids,
+          names: ids,
+          priorities: ids.map((_, index) => index),
+          units: ids.map(() => ""),
+          contexts: ids.map(() => ""),
+          grouped: ["dimension"],
+        },
+      },
+    })
+
+    await loadHeatmapPayload(chart, ids, [[1, 2, 1, 3, 2, 1, 1]], { timestamp: 1617946860000 })
+    chart.getDateWindow = () => [1617946860000, 1617947750000]
+    chart.formatXAxis = x => x.toString()
+    chart.getThemeAttribute = () => "#333"
+    chart.getUnitSign = () => ""
+
+    const calls = []
+    const record = name => jest.fn((...args) => calls.push([name, ...args]))
+    mockDygraph.canvas_ctx_ = {
+      canvas: { width: 800, height: 400 },
+      save: jest.fn(),
+      restore: jest.fn(),
+      beginPath: jest.fn(),
+      closePath: jest.fn(),
+      moveTo: jest.fn(),
+      lineTo: jest.fn(),
+      stroke: jest.fn(),
+      setLineDash: jest.fn(),
+      setTransform: jest.fn(),
+      clearRect: record("clearRect"),
+      strokeRect: record("strokeRect"),
+    }
+    mockDygraph.layout_ = { points: [[{ canvasx: 100 }, { canvasx: 120 }]] }
+    mockDygraph.toDomYCoord = index => 300 - index * 40
+
+    const instance = dygraphChart(sdk, chart)
+    instance.mount(document.createElement("div"))
+
+    chart.updateAttribute("hoverX", [1617946860000, "2"])
+    chart.updateAttribute("hoverX", [1617946860000, "4"])
+    chart.updateAttribute("hoverX", null)
+
+    expect(calls.map(([name]) => name)).toEqual([
+      "clearRect",
+      "strokeRect",
+      "clearRect",
+      "strokeRect",
+      "clearRect",
+    ])
+    expect(calls[0]).toEqual(["clearRect", 0, 0, 800, 400])
+    expect(calls[3][2]).toBeLessThan(calls[1][2])
+
+    delete mockDygraph.canvas_ctx_
+    delete mockDygraph.layout_
+    delete mockDygraph.toDomYCoord
+  })
+
   it("re-ranges the y axis over every row when empty rows are kept", async () => {
     const ids = ["0", "1", "2", "3", "4", "5", "6"]
     const { sdk, chart } = makeTestChart({

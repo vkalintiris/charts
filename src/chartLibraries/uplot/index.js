@@ -70,6 +70,8 @@ const rightPad = 0
 const xTickSpace = 80
 const heatmapPixelsPerLabel = 15
 const markedCellLineWidth = 2
+const hoverCellLineWidth = 1.5
+const hoverCellLineDash = [3, 3]
 
 const lineWidth = 2
 const areaLineWidth = 2
@@ -883,6 +885,27 @@ export default (sdk, chart) => {
     return min == null || max == null ? null : [min * 1000, max * 1000]
   }
 
+  const strokeHeatmapCell = (self, ctx, x, yIndex, { color, lineWidth, dash = [] }) => {
+    const pxRatio = getPxRatio()
+    const cell = makeHeatmapCell(self, { gap: chart.getAttribute("heatmapCellGap") })(x, yIndex)
+    const width = lineWidth * pxRatio
+
+    ctx.save()
+    ctx.beginPath()
+    ctx.rect(self.bbox.left, self.bbox.top, self.bbox.width, self.bbox.height)
+    ctx.clip()
+    ctx.setLineDash(dash.map(length => length * pxRatio))
+    ctx.strokeStyle = color
+    ctx.lineWidth = width
+    ctx.strokeRect(
+      cell.x + width / 2,
+      cell.y + width / 2,
+      Math.max(0, cell.width - width),
+      Math.max(0, cell.height - width)
+    )
+    ctx.restore()
+  }
+
   const drawMarkedCell = (self, ctx) => {
     if (!isHeatmap(chart)) return
 
@@ -890,25 +913,29 @@ export default (sdk, chart) => {
     const x = marked && self.data[0]?.[marked.row]
     if (x == null) return
 
-    const cell = makeHeatmapCell(self, { gap: chart.getAttribute("heatmapCellGap") })(
-      x,
-      marked.yIndex
-    )
-    const lineWidth = markedCellLineWidth * getPxRatio()
+    strokeHeatmapCell(self, ctx, x, marked.yIndex, {
+      color: chart.getThemeAttribute("themeHeatmapMarkedCell"),
+      lineWidth: markedCellLineWidth,
+    })
+  }
 
-    ctx.save()
-    ctx.beginPath()
-    ctx.rect(self.bbox.left, self.bbox.top, self.bbox.width, self.bbox.height)
-    ctx.clip()
-    ctx.strokeStyle = chart.getThemeAttribute("themeHeatmapMarkedCell")
-    ctx.lineWidth = lineWidth
-    ctx.strokeRect(
-      cell.x + lineWidth / 2,
-      cell.y + lineWidth / 2,
-      Math.max(0, cell.width - lineWidth),
-      Math.max(0, cell.height - lineWidth)
-    )
-    ctx.restore()
+  const drawHoverCell = (self, ctx, hoverX) => {
+    if (!isHeatmap(chart) || !chart.getAttribute("heatmapHoverCell")) return
+    if (!Array.isArray(hoverX)) return
+
+    const [timestamp, id] = hoverX
+    if (timestamp == null || !isInWindow(self, timestamp)) return
+
+    const yIndex = chart.getHeatmapYIndex(id)
+    const row = chart.getClosestRow(timestamp)
+    const x = row === -1 ? null : self.data[0]?.[row]
+    if (yIndex === -1 || x == null) return
+
+    strokeHeatmapCell(self, ctx, x, yIndex, {
+      color: chart.getAttribute("heatmapHoverColor") || chart.getThemeAttribute("themeCrosshair"),
+      lineWidth: hoverCellLineWidth,
+      dash: hoverCellLineDash,
+    })
   }
 
   const renderCrosshair = () => {
@@ -920,6 +947,7 @@ export default (sdk, chart) => {
     const clickX = chart.getAttribute("clickX")
 
     drawMarkedCell(u, overlayCtx)
+    drawHoverCell(u, overlayCtx, hoverX)
     drawVerticalLine(u, overlayCtx, hoverX, chart.getThemeAttribute("themeCrosshair"), [5, 5])
     drawVerticalLine(u, overlayCtx, clickX, chart.getThemeAttribute("themeNetdata"), [2, 2])
     drawHoverDots(u, overlayCtx, hoverX)
@@ -1741,6 +1769,8 @@ export default (sdk, chart) => {
       chart.onAttributeChange("heatmapCellGap", () => u && u.redraw(false, false)),
       chart.onAttributeChange("heatmapPalette", () => u && u.redraw(false, false)),
       chart.onAttributeChange("heatmapMarkedCell", () => renderCrosshair()),
+      chart.onAttributeChange("heatmapHoverCell", () => renderCrosshair()),
+      chart.onAttributeChange("heatmapHoverColor", () => renderCrosshair()),
       chart.onAttributeChange("heatmapColorScale", () => u && u.redraw(false, false)),
       chart.onAttributeChange("anomalySpotlight", () => u && u.redraw(false, false)),
       chart.onAttributeChange("unitsConversionPrefix", onUnitsConversionChange),

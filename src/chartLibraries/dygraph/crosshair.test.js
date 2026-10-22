@@ -1,4 +1,4 @@
-import crosshair from "./crosshair"
+import crosshair, { clearInteractionLayer, drawHoverCell } from "./crosshair"
 import { makeTestChart } from "@jest/testUtilities"
 
 describe("crosshair", () => {
@@ -291,6 +291,53 @@ describe("crosshair", () => {
       expect(mockCtx.strokeStyle).toBeUndefined()
 
       getThemeAttributeSpy.mockRestore()
+    })
+  })
+
+  describe("heatmap hover cell", () => {
+    beforeEach(() => {
+      mockCtx.strokeRect = jest.fn()
+      mockCtx.clearRect = jest.fn()
+      mockCtx.setTransform = jest.fn()
+      mockCtx.canvas = { width: 1600, height: 800 }
+      mockDygraph.layout_ = { points: [[{ canvasx: 100 }, { canvasx: 120 }]] }
+      mockDygraph.toDomYCoord = index => 300 - index * 40
+      mockDygraph.toDomXCoord.mockReturnValue(110)
+      jest.spyOn(chart, "getHeatmapYIndex").mockImplementation(id => ["a", "b", "c"].indexOf(id))
+    })
+
+    it("outlines the hovered cell with a dashed line inside its edges", () => {
+      jest.spyOn(chart, "getThemeAttribute").mockReturnValue("#536775")
+
+      drawHoverCell(mockChartUI, 0, "b")
+
+      expect(mockCtx.setLineDash).toHaveBeenCalledWith([3, 3])
+      expect(mockCtx.lineWidth).toBe(1.5)
+      expect(mockCtx.strokeStyle).toBe("#536775")
+      expect(mockCtx.strokeRect).toHaveBeenCalledWith(100.75, 240.75, 18.5, 38.5)
+    })
+
+    it("uses the hover colour when one is set", () => {
+      jest
+        .spyOn(chart, "getAttribute")
+        .mockImplementation(name => (name === "heatmapHoverColor" ? "#F28E2B" : undefined))
+
+      drawHoverCell(mockChartUI, 0, "b")
+
+      expect(mockCtx.strokeStyle).toBe("#F28E2B")
+    })
+
+    it("draws nothing for a row that is not a visible heatmap row", () => {
+      drawHoverCell(mockChartUI, 0, "series-from-another-chart")
+
+      expect(mockCtx.strokeRect).not.toHaveBeenCalled()
+    })
+
+    it("clears the whole interaction canvas in device pixels", () => {
+      clearInteractionLayer(mockChartUI)
+
+      expect(mockCtx.setTransform).toHaveBeenCalledWith(1, 0, 0, 1, 0, 0)
+      expect(mockCtx.clearRect).toHaveBeenCalledWith(0, 0, 1600, 800)
     })
   })
 })
