@@ -17,6 +17,7 @@ import { darkenColor } from "@/chartLibraries/helpers/color"
 import { isVisibleDimension } from "@/chartLibraries/helpers/dimensionVisibility"
 import { areAnnotationsDisabled } from "@/chartLibraries/helpers/annotations"
 import { formatHeatmapLabel } from "@/helpers/heatmapScale"
+import makeHeatmapCell from "./heatmapCell"
 import {
   getSeriesStackBounds,
   getRowStackEnds,
@@ -665,15 +666,7 @@ export default (sdk, chart) => {
 
     const { ctx } = self
     const getColor = makeGetColor(chart)
-
-    let minWidthSep = Infinity
-    for (let i = 1; i < xs.length; i++) {
-      const sep = self.valToPos(xs[i], "x", true) - self.valToPos(xs[i - 1], "x", true)
-      if (sep < minWidthSep) minWidthSep = sep
-    }
-
-    const barWidth = Number.isFinite(minWidthSep) ? Math.floor(minWidthSep) : self.bbox.width
-    const rowHeight = Math.abs(self.valToPos(1, "y", true) - self.valToPos(0, "y", true))
+    const getCell = makeHeatmapCell(self)
     const { all } = chart.getPayload()
     if (!all) return
 
@@ -689,8 +682,6 @@ export default (sdk, chart) => {
       const yIndex = chart.getHeatmapYIndex(id)
       if (yIndex === -1) return
 
-      const yTop = self.valToPos(yIndex, "y", true) - rowHeight / 2
-
       for (let row = 0; row < xs.length; row++) {
         const x = xs[row]
         if (clipToWindow && (x < xMin || x > xMax)) continue
@@ -699,8 +690,9 @@ export default (sdk, chart) => {
         const color = getColor(value)
         if (color === "transparent") continue
 
+        const cell = getCell(x, yIndex)
         ctx.fillStyle = color
-        ctx.fillRect(self.valToPos(x, "x", true) - barWidth / 2, yTop, barWidth, rowHeight)
+        ctx.fillRect(cell.x, cell.y, cell.width, cell.height)
       }
     })
 

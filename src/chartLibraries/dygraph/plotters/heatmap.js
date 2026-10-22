@@ -1,4 +1,5 @@
 import { makeGetColor } from "@/helpers/heatmap"
+import makeHeatmapCell from "../heatmapCell"
 
 export default chartUI => plotter => {
   if (!chartUI) return
@@ -10,15 +11,9 @@ export default chartUI => plotter => {
   const ctx = plotter.drawingContext
   const sets = plotter.allSeriesPoints
   const series = g.layout_.setNames
+  if (!sets.length) return
 
-  let minWidthSep = Infinity
-  sets.forEach(points => {
-    const widthSep = points[1].canvasx - points[0].canvasx
-    if (widthSep < minWidthSep) minWidthSep = widthSep
-  })
-
-  const barWidth = Math.floor(minWidthSep)
-
+  const getCell = makeHeatmapCell(g, sets[0])
   const getColor = makeGetColor(chartUI.chart)
 
   series.forEach((seriesName, j) => {
@@ -26,21 +21,13 @@ export default chartUI => plotter => {
 
     if (index === -1) return
 
-    const height = Math.abs(
-      index === 0
-        ? g.toDomYCoord(index + 1) - g.toDomYCoord(index)
-        : g.toDomYCoord(index) - g.toDomYCoord(index - 1)
-    )
-
     sets[j].forEach((p, i) => {
       const rowIndex = Number.isInteger(p.idx) ? p.idx : i
       const value = chartUI.chart.getDimensionValue(seriesName, rowIndex, { allowNull: true })
+      const { x, y, width, height } = getCell(p.canvasx, index)
 
       ctx.fillStyle = getColor(value)
-      ctx.fillRect(p.canvasx - barWidth / 2, g.toDomYCoord(index) - height / 2, barWidth, height)
-
-      ctx.strokeStyle = "transparent"
-      ctx.strokeRect(p.canvasx - barWidth / 2, g.toDomYCoord(index) - height / 2, barWidth, height)
+      ctx.fillRect(x, y, width, height)
     })
   })
 }
