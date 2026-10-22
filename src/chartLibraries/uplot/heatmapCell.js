@@ -1,6 +1,5 @@
+import { fitHeatmapGap } from "@/helpers/heatmap"
 import getPxRatio from "./pxRatio"
-
-const fitGap = (size, gap) => (size >= 2 * gap + 1 ? gap : 0)
 
 export default (self, { gap = 0 } = {}) => {
   const xs = self.data[0] || []
@@ -11,11 +10,11 @@ export default (self, { gap = 0 } = {}) => {
     if (sep > 0 && sep < minSep) minSep = sep
   }
 
-  const width = Number.isFinite(minSep) ? Math.floor(minSep) : self.bbox.width
+  const width = Number.isFinite(minSep) ? minSep : self.bbox.width
   const height = Math.abs(self.valToPos(1, "y", true) - self.valToPos(0, "y", true))
   const gapPx = gap * getPxRatio()
-  const gapX = fitGap(width, gapPx)
-  const gapY = fitGap(height, gapPx)
+  const gapX = fitHeatmapGap(width, gapPx)
+  const gapY = fitHeatmapGap(height, gapPx)
 
   return (x, yIndex) => {
     const centerX = self.valToPos(x, "x", true)

@@ -24,6 +24,8 @@ export const snapHeatmapRange = ([min, max]) => [Math.round(min) - 0.5, Math.rou
 
 export const getHeatmapLabelOffset = chart => (chart.getHeatmapSortedIds?.() ? 0.5 : 0)
 
+export const fitHeatmapGap = (size, gap) => (size >= 2 * gap + 1 ? gap : 0)
+
 export const getMarkedHeatmapCell = (chart, getXRange) => {
   const marked = chart.getAttribute("heatmapMarkedCell")
   if (!marked) return null

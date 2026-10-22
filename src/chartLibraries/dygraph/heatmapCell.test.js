@@ -35,4 +35,14 @@ describe("dygraph heatmap cell", () => {
     const getCell = makeHeatmapCell(g, [{ canvasx: 10.3 }, { canvasx: 30.3 }], { ratio: 2 })
     expect(getCell(30.3, 2)).toEqual({ x: 20.5, y: 150, width: 20, height: 20 })
   })
+
+  it("lets neighbouring cells share an edge when the column pitch is fractional", () => {
+    const points = [{ canvasx: 10 }, { canvasx: 25.4 }, { canvasx: 40.8 }, { canvasx: 56.2 }]
+    const getCell = makeHeatmapCell(g, points, { ratio: 1 })
+    const cells = points.map(({ canvasx }) => getCell(canvasx, 0))
+
+    cells
+      .slice(1)
+      .forEach((cell, index) => expect(cell.x).toBe(cells[index].x + cells[index].width))
+  })
 })
