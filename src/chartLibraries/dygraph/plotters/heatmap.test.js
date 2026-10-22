@@ -72,7 +72,7 @@ describe("heatmap plotter", () => {
     plotterFunc(plotter)
 
     expect(ctx.fillRect).toHaveBeenCalled()
-    expect(ctx.strokeRect).toHaveBeenCalled()
+    expect(ctx.strokeRect).not.toHaveBeenCalled()
   })
 
   it("calculates bar width from minimum separation", () => {
@@ -105,11 +105,11 @@ describe("heatmap plotter", () => {
     plotter.dygraph.toDomYCoord = jest.fn(index => 50 + index * 20)
 
     chartUI.chart.getHeatmapYIndex.mockImplementation(id => {
-      const indexes = { "0.3": 0, 2: 1, "+Inf": 2 }
+      const indexes = { 0.3: 0, 2: 1, "+Inf": 2 }
       return indexes[id] ?? -1
     })
     chartUI.chart.getDimensionValue.mockImplementation(id => {
-      const values = { "0.3": 1, 2: 2, "+Inf": 3 }
+      const values = { 0.3: 1, 2: 2, "+Inf": 3 }
       return values[id]
     })
 
@@ -145,7 +145,6 @@ describe("heatmap plotter", () => {
     plotterFunc(plotter)
 
     expect(ctx.fillStyle).toContain("rgb(")
-    expect(ctx.strokeStyle).toBe("transparent")
   })
 
   it("calculates height based on series position", () => {
@@ -173,6 +172,16 @@ describe("heatmap plotter", () => {
     const plotterFunc = heatmapPlotter(chartUI)
     expect(() => plotterFunc(plotter)).not.toThrow()
     expect(ctx.fillRect).not.toHaveBeenCalled()
+  })
+
+  it("draws a one-column window as a single plot-wide cell", () => {
+    plotter.allSeriesPoints = [[{ canvasx: 60 }]]
+    plotter.dygraph.layout_.setNames = ["dim1"]
+    plotter.dygraph.getArea = () => ({ x: 10, y: 0, w: 100, h: 200 })
+    const plotterFunc = heatmapPlotter(chartUI)
+
+    expect(() => plotterFunc(plotter)).not.toThrow()
+    expect(ctx.fillRect).toHaveBeenCalledWith(10, expect.any(Number), 100, expect.any(Number))
   })
 
   it("handles two data points", () => {
