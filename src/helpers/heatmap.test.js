@@ -189,6 +189,24 @@ describe("heatmap utilities", () => {
       ).toEqual(blues)
     })
 
+    it("drops entries that are not colours", () => {
+      expect(
+        getHeatmapPalette(
+          chartWith({ heatmapPalette: ["#000", "not a colour", [1, 2, 3], "#fff"] })
+        )
+      ).toEqual(["#000", "#fff"])
+      expect(getHeatmapPalette(chartWith({ heatmapPalette: ["#000", "nope"] }))).toEqual(
+        heatmapDefaultPalette
+      )
+    })
+
+    it("places counts below zero at the bottom of a log scale", () => {
+      const getColor = makeGetColor(
+        chartWith({ heatmapPalette: ["#ff0000", "#0000ff"], heatmapColorScale: "log" })
+      )
+      expect(getColor(-5)).toBe("rgb(255, 0, 0)")
+    })
+
     it("falls back to the default palette without at least two colours", () => {
       expect(getHeatmapPalette(chartWith({}))).toEqual(heatmapDefaultPalette)
       expect(getHeatmapPalette(chartWith({ heatmapPalette: ["#fff"] }))).toEqual(
