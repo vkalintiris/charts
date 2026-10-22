@@ -356,9 +356,18 @@ describe("heatmap utilities", () => {
     })
 
     it("snaps a value range outwards to the edges of the rows it touches", () => {
-      expect(snapHeatmapRange([1.3, 3.7])).toEqual([0.5, 4.5])
-      expect(snapHeatmapRange([2, 2])).toEqual([1.5, 2.5])
-      expect(snapHeatmapRange([-0.4, 0.2])).toEqual([-0.5, 0.5])
+      expect(snapHeatmapRange([1.3, 3.7], 7)).toEqual([0.5, 4.5])
+      expect(snapHeatmapRange([2, 2], 7)).toEqual([1.5, 2.5])
+      expect(snapHeatmapRange([-0.4, 0.2], 7)).toEqual([-0.5, 0.5])
+    })
+
+    it("adds no row for a range that ends on a row edge", () => {
+      expect(snapHeatmapRange([0.5, 2.5], 7)).toEqual([0.5, 2.5])
+    })
+
+    it("keeps the range inside the rows and at least one row tall", () => {
+      expect(snapHeatmapRange([-2, 9], 7)).toEqual([-0.5, 6.5])
+      expect(snapHeatmapRange([7, 8], 7)).toEqual([5.5, 6.5])
     })
 
     it("puts labels of numeric buckets on the row's upper edge, others on its centre", () => {

@@ -20,7 +20,13 @@ export const isIncremental = chart =>
 
 export const getHeatmapRowsRange = count => [-0.5, Math.max(count, 1) - 0.5]
 
-export const snapHeatmapRange = ([min, max]) => [Math.round(min) - 0.5, Math.round(max) + 0.5]
+export const snapHeatmapRange = ([min, max], count) => {
+  const top = Math.max(count, 1) - 0.5
+  const low = Math.min(Math.max(Math.floor(min + 0.5) - 0.5, -0.5), top - 1)
+  const high = Math.max(Math.min(Math.ceil(max - 0.5) + 0.5, top), low + 1)
+
+  return [low, high]
+}
 
 export const getHeatmapLabelOffset = chart => (chart.getHeatmapSortedIds?.() ? 0.5 : 0)
 
