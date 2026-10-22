@@ -6,6 +6,8 @@ import {
   makeGetColor,
   withoutPrefix,
   cropHeatmapZeroEdges,
+  getHeatmapRowsRange,
+  snapHeatmapRange,
 } from "./heatmap"
 
 describe("heatmap utilities", () => {
@@ -243,6 +245,19 @@ describe("heatmap utilities", () => {
       const ids = ["0", "1", "2", "3", "4", "5"]
 
       expect(cropHeatmapZeroEdges(ids)).toEqual(ids)
+    })
+  })
+
+  describe("heatmap row ranges", () => {
+    it("frames whole rows, each row centred on its index", () => {
+      expect(getHeatmapRowsRange(5)).toEqual([-0.5, 4.5])
+      expect(getHeatmapRowsRange(0)).toEqual([-0.5, 0.5])
+    })
+
+    it("snaps a value range outwards to the edges of the rows it touches", () => {
+      expect(snapHeatmapRange([1.3, 3.7])).toEqual([0.5, 4.5])
+      expect(snapHeatmapRange([2, 2])).toEqual([1.5, 2.5])
+      expect(snapHeatmapRange([-0.4, 0.2])).toEqual([-0.5, 0.5])
     })
   })
 })

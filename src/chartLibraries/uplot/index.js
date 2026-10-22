@@ -6,7 +6,12 @@ import convert from "@/helpers/units"
 import { unregister } from "@/helpers/makeListeners"
 import makeResizeObserver from "@/helpers/makeResizeObserver"
 import limitRange from "@/helpers/limitRange"
-import { makeGetColor, withoutPrefix } from "@/helpers/heatmap"
+import {
+  makeGetColor,
+  withoutPrefix,
+  getHeatmapRowsRange,
+  snapHeatmapRange,
+} from "@/helpers/heatmap"
 import { darkenColor } from "@/chartLibraries/helpers/color"
 import { isVisibleDimension } from "@/chartLibraries/helpers/dimensionVisibility"
 import { areAnnotationsDisabled } from "@/chartLibraries/helpers/annotations"
@@ -60,7 +65,6 @@ const xAxisGap = 3
 const rightPad = 0
 const xTickSpace = 80
 const heatmapPixelsPerLabel = 15
-const heatmapRowPad = 0.5
 
 const lineWidth = 2
 const areaLineWidth = 2
@@ -318,10 +322,9 @@ export default (sdk, chart) => {
 
   const getHeatmapValueRange = () => {
     const staticValueRange = chart.getAttribute("staticValueRange")
-    if (staticValueRange) return [Math.ceil(staticValueRange[0]), Math.ceil(staticValueRange[1])]
+    if (staticValueRange) return snapHeatmapRange(staticValueRange)
 
-    const count = chart.getVisibleHeatmapIds().length || 1
-    return [-heatmapRowPad, count - heatmapRowPad]
+    return getHeatmapRowsRange(chart.getVisibleHeatmapIds().length)
   }
 
   const getEmptyValueRange = () => {

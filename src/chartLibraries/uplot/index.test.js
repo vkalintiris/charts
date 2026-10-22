@@ -677,6 +677,18 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
+  it("snaps a y-zoom to the edges of whole rows", async () => {
+    const { chart, instance, element } = await mountHeatmap()
+
+    instance.mount(element)
+    const u = instance.getUPlot()
+
+    chart.updateAttribute("staticValueRange", [1.3, 3.7])
+    expect(u.scales.y.range(u, 0, 100)).toEqual([0.5, 4.5])
+
+    cleanup(instance, element)
+  })
+
   it("exercises the shared heatmap accessors while rendering", async () => {
     const { chart, instance, element } = await mountHeatmap()
 
