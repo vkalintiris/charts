@@ -12,6 +12,8 @@ import makeDefaultSDK from "../../makeDefaultSDK"
 import systemLoadLine from "../../../fixtures/systemLoadLine"
 import initialAttributes from "@/sdk/initialAttributes"
 import makeGetClosestRow from "@/sdk/makeChart/makeGetClosestRow"
+import { withoutPrefix } from "@/helpers/heatmap"
+import { formatHeatmapLabel } from "@/helpers/heatmapScale"
 import uplotChart from "./index"
 import { getStackBounds, getStackValueRange } from "./stacking"
 
@@ -729,14 +731,18 @@ describe("uplotChart heatmap", () => {
 
     expect(splits.length).toBeGreaterThan(0)
     splits.forEach(split => {
-      expect(Number.isInteger(split)).toBe(true)
-      expect(split).toBeGreaterThanOrEqual(0)
+      expect(Number.isInteger(split - 0.5)).toBe(true)
+      expect(split).toBeGreaterThanOrEqual(0.5)
       expect(split).toBeLessThan(numBuckets)
     })
 
+    const ids = chart.getVisibleHeatmapIds()
     const values = u.axes[1].values(u, splits)
-    expect(values).toHaveLength(splits.length)
-    values.forEach(value => expect(typeof value).toBe("string"))
+    expect(values).toEqual(
+      splits.map(split =>
+        formatHeatmapLabel(withoutPrefix(ids[split - 0.5]), chart.getHeatmapScale())
+      )
+    )
 
     cleanup(instance, element)
   })

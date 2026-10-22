@@ -2,7 +2,12 @@ import Dygraph from "dygraphs"
 import makeChartUI from "@/sdk/makeChartUI"
 import makeResizeObserver from "@/helpers/makeResizeObserver"
 import makeExecuteLatest from "@/helpers/makeExecuteLatest"
-import { isHeatmap, getHeatmapRowsRange, snapHeatmapRange } from "@/helpers/heatmap"
+import {
+  isHeatmap,
+  getHeatmapRowsRange,
+  snapHeatmapRange,
+  getHeatmapLabelOffset,
+} from "@/helpers/heatmap"
 import {
   makeLinePlotter,
   makeStackedAreaPlotter,
@@ -381,6 +386,7 @@ export default (sdk, chart) => {
       ? makeYTicker({
           labels: chart.getVisibleHeatmapIds?.() || chart.getVisibleDimensionIds(),
           scale: chart.getHeatmapScale?.(),
+          labelOffset: getHeatmapLabelOffset(chart),
           secondsAsTime: chart.getAttribute("secondsAsTime"),
           units: chart.getVisibleDimensionIds().map(id => chart.getDimensionUnit(id)),
         })
