@@ -679,6 +679,19 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
+  it("redraws when the cell gap changes", async () => {
+    const { chart, instance, element } = await mountHeatmap()
+
+    instance.mount(element)
+    const redraw = jest.spyOn(instance.getUPlot(), "redraw")
+
+    chart.updateAttribute("heatmapCellGap", 1)
+    expect(redraw).toHaveBeenCalledWith(false, false)
+
+    redraw.mockRestore()
+    cleanup(instance, element)
+  })
+
   it("snaps a y-zoom to the edges of whole rows", async () => {
     const { chart, instance, element } = await mountHeatmap()
 

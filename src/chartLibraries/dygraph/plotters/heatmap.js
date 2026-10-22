@@ -13,7 +13,9 @@ export default chartUI => plotter => {
   const series = g.layout_.setNames
   if (!sets.length) return
 
-  const getCell = makeHeatmapCell(g, sets[0])
+  const getCell = makeHeatmapCell(g, sets[0], {
+    gap: chartUI.chart.getAttribute("heatmapCellGap"),
+  })
   const getColor = makeGetColor(chartUI.chart)
 
   series.forEach((seriesName, j) => {
