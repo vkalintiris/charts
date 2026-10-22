@@ -20,6 +20,8 @@ export const getHeatmapRowsRange = count => [-0.5, Math.max(count, 1) - 0.5]
 
 export const snapHeatmapRange = ([min, max]) => [Math.round(min) - 0.5, Math.round(max) + 0.5]
 
+export const getHeatmapLabelOffset = chart => (chart.getHeatmapSortedIds?.() ? 0.5 : 0)
+
 const regex = /(.+)_(-?\d+?\.?(\d+)?|\+[Ii]nf)$/
 
 export const heatmapOrChartType = (ids, chartType) =>

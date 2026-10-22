@@ -8,6 +8,7 @@ import {
   cropHeatmapZeroEdges,
   getHeatmapRowsRange,
   snapHeatmapRange,
+  getHeatmapLabelOffset,
 } from "./heatmap"
 
 describe("heatmap utilities", () => {
@@ -258,6 +259,11 @@ describe("heatmap utilities", () => {
       expect(snapHeatmapRange([1.3, 3.7])).toEqual([0.5, 4.5])
       expect(snapHeatmapRange([2, 2])).toEqual([1.5, 2.5])
       expect(snapHeatmapRange([-0.4, 0.2])).toEqual([-0.5, 0.5])
+    })
+
+    it("puts labels of numeric buckets on the row's upper edge, others on its centre", () => {
+      expect(getHeatmapLabelOffset({ getHeatmapSortedIds: () => ["1", "2"] })).toBe(0.5)
+      expect(getHeatmapLabelOffset({ getHeatmapSortedIds: () => null })).toBe(0)
     })
   })
 })

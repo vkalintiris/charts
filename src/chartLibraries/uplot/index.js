@@ -11,6 +11,7 @@ import {
   withoutPrefix,
   getHeatmapRowsRange,
   snapHeatmapRange,
+  getHeatmapLabelOffset,
 } from "@/helpers/heatmap"
 import { darkenColor } from "@/chartLibraries/helpers/color"
 import { isVisibleDimension } from "@/chartLibraries/helpers/dimensionVisibility"
@@ -427,14 +428,18 @@ export default (sdk, chart) => {
       const maxTicks = Math.max(1, Math.floor(heightPx / heatmapPixelsPerLabel))
       const step = Math.max(1, Math.ceil(count / Math.max(1, maxTicks - 1)))
 
+      const offset = getHeatmapLabelOffset(chart)
       const splits = []
-      for (let i = 0; i < count; i++) if (i % step === 0) splits.push(i)
+      for (let i = 0; i < count; i++) if (i % step === 0) splits.push(i + offset)
       return splits
     },
     values: (self, splits) => {
       const ids = chart.getVisibleHeatmapIds()
       const scale = chart.getHeatmapScale()
-      return splits.map(index => formatHeatmapLabel(withoutPrefix(ids[index]), scale))
+      const offset = getHeatmapLabelOffset(chart)
+      return splits.map(split =>
+        formatHeatmapLabel(withoutPrefix(ids[Math.round(split - offset)]), scale)
+      )
     },
   })
 
