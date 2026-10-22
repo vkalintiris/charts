@@ -686,8 +686,11 @@ describe("uplotChart heatmap", () => {
     const u = instance.getUPlot()
     const cropped = chart.getVisibleHeatmapIds().length
 
+    const setData = jest.spyOn(u, "setData")
     chart.updateAttribute("heatmapKeepEmptyRows", true)
+    expect(setData).toHaveBeenCalledWith(u.data, true)
     expect(u.scales.y.range(u, 0, 100)).toEqual([-0.5, heatmapIds.length - 0.5])
+    setData.mockRestore()
     expect(cropped).toBeLessThan(heatmapIds.length)
 
     cleanup(instance, element)
@@ -806,8 +809,11 @@ describe("uplotChart heatmap", () => {
     instance.mount(element)
     const u = instance.getUPlot()
 
+    const setData = jest.spyOn(u, "setData")
     chart.updateAttribute("staticValueRange", [1.3, 3.7])
+    expect(setData).toHaveBeenCalledWith(u.data, true)
     expect(u.scales.y.range(u, 0, 100)).toEqual([0.5, 4.5])
+    setData.mockRestore()
 
     cleanup(instance, element)
   })
