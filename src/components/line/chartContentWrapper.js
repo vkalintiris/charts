@@ -144,6 +144,7 @@ export const Container = props => {
   const navigation = useAttributeValue("navigation")
   const heatmap = useIsHeatmap()
   const cellClick = useAttributeValue("heatmapCellClick")
+  const enabledNavigation = useAttributeValue("enabledNavigation")
 
   return (
     <StyledContainer
@@ -155,7 +156,7 @@ export const Container = props => {
       width="100%"
       overflow="hidden"
       navigation={navigation}
-      $cellClick={heatmap && !!cellClick}
+      $cellClick={heatmap && !!cellClick && !!enabledNavigation && navigation === "pan"}
       {...props}
     />
   )
