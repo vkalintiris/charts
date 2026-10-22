@@ -43,4 +43,24 @@ describe("modern heatmap tooltip", () => {
     expect(window.getComputedStyle(hovered).color).toBe("rgb(242, 142, 43)")
     expect(window.getComputedStyle(other).color).not.toBe("rgb(242, 142, 43)")
   })
+
+  it("hides empty rows and lists the top row first when asked", async () => {
+    const names = await showTooltip({
+      heatmapTooltipHideZeros: true,
+      heatmapTooltipTopFirst: true,
+    })
+
+    expect(names.map(name => name.textContent)).toEqual(["6", "4", "3", "1"])
+  })
+
+  it("shows only names and values with heatmapTooltipValueOnly", async () => {
+    const row = [1, 0, [3, 77, 0], 2, 0, 4]
+
+    await showTooltip({}, row)
+    expect(screen.getByTestId("modernTooltip").textContent).toContain("77")
+
+    document.body.innerHTML = ""
+    await showTooltip({ heatmapTooltipValueOnly: true }, row)
+    expect(screen.getByTestId("modernTooltip").textContent).not.toContain("77")
+  })
 })

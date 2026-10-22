@@ -1,5 +1,6 @@
 import React from "react"
 import styled from "styled-components"
+import getTooltipDimensionIds from "@/helpers/getTooltipDimensionIds"
 import { Box, getColor } from "@netdata/netdata-ui"
 import {
   useAttributeValue,
@@ -103,17 +104,17 @@ const Tooltip = () => {
   const isHeatmap = useIsHeatmap()
   const [, hoveredId] = useAttributeValue("hoverX") || []
   const hoverColor = useAttributeValue("heatmapHoverColor")
+  const valueOnly = useAttributeValue("heatmapTooltipValueOnly")
   const { index, timestamp, getRow } = useLegendRows({ withRows: false })
 
   if (index === -1) return null
 
-  let ids = chart.onHoverSortDimensions(index, sortByRow[hoveredId] || "valueDesc") || []
-  if (chart.getAttribute("selectedDimensions").length > 0)
-    ids = ids.filter(id => chart.isDimensionVisible(id))
+  const ids = getTooltipDimensionIds(chart, index, sortByRow[hoveredId] || "valueDesc")
   const shown = (isHeatmap ? ids : pickShown(ids, hoveredId)).map(getRow)
   const more = ids.length - shown.length
-  const withAnomaly = shown.some(row => !!row.anomaly)
-  const withFlags = shown.some(row => !!row.flags)
+  const valuesOnly = isHeatmap && valueOnly
+  const withAnomaly = !valuesOnly && shown.some(row => !!row.anomaly)
+  const withFlags = !valuesOnly && shown.some(row => !!row.flags)
 
   const columns = [
     isHeatmap ? null : "10px",
