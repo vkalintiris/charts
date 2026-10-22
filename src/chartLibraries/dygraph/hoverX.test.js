@@ -261,6 +261,45 @@ describe("hoverX", () => {
     expect(chart.updateAttribute).not.toHaveBeenCalledWith("draftAnnotation", expect.anything())
   })
 
+  it("reports a cell click that arrives after a pan turned hover off and on again", () => {
+    const visibleHeatmapIds = ["low", "mid", "high"]
+
+    chart.getAttribute = jest.fn(key => {
+      if (key === "chartType") return "heatmap"
+      if (key === "overlays") return {}
+      if (key === "heatmapCellClick") return true
+      return null
+    })
+    chart.getVisibleHeatmapIds = jest.fn(() => visibleHeatmapIds)
+    chart.getHeatmapYIndex = jest.fn(id => visibleHeatmapIds.indexOf(id))
+    chart.getPayload = jest.fn(() => ({ all: [], point: {} }))
+    chartUI.getDygraph = jest.fn(() => ({
+      getArea: jest.fn(() => ({ h: 200 })),
+      toDomYCoord: jest.fn(index => [150, 100, 50][index]),
+    }))
+
+    hoverXInstance.toggle(true)
+    const highlightHandler = chartUI.on.mock.calls.find(call => call[0] === "highlightCallback")[1]
+    const event = {
+      clientX: 100,
+      clientY: 100,
+      target: { getBoundingClientRect: () => ({ left: 0, top: 0 }) },
+    }
+    highlightHandler(event, 1640995200000, [])
+
+    hoverXInstance.toggle(false)
+    hoverXInstance.toggle(true)
+    const clickHandler = chartUI.on.mock.calls.filter(call => call[0] === "click").at(-1)[1]
+    clickHandler(event, 1640995200000, [])
+
+    expect(chartUI.sdk.trigger).toHaveBeenCalledWith(
+      "heatmapCellClick",
+      chart,
+      1640995200000,
+      "mid"
+    )
+  })
+
   it("gives the heatmap row, not the empty anomaly band, at the top of a heatmap", () => {
     const visibleHeatmapIds = ["low", "mid", "high"]
 

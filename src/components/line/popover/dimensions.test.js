@@ -1,5 +1,5 @@
 import React from "react"
-import { screen } from "@testing-library/react"
+import { screen, within } from "@testing-library/react"
 import "@testing-library/jest-dom"
 import {
   loadHeatmapPayload,
@@ -78,6 +78,9 @@ describe("line popover Dimensions", () => {
     const above = screen.getAllByTestId("chartPopover-nameAboveBar")
     expect(above).toHaveLength(1)
     expect(above[0]).toHaveTextContent("3")
+
+    const bar = within(above[0].parentElement).getByTestId("chartDimensions-color")
+    expect(window.getComputedStyle(bar).background).toContain("rgb(242, 142, 43)")
   })
 
   it("drops the anomaly and info columns of a heatmap with heatmapTooltipValueOnly", async () => {
