@@ -244,6 +244,11 @@ export default (sdk, chart) => {
       }),
       chart.onAttributeChange("timezone", () => updateOptions({})),
       chart.onAttributeChange("heatmapCellGap", () => updateOptions({})),
+      chart.onAttributeChange("heatmapKeepEmptyRows", () => {
+        if (chart.getAttribute("processing")) return
+
+        updateOptions({ ...makeDataOptions(), ...makeChartTypeOptions() })
+      }),
     ].filter(Boolean)
 
     overlays.toggle()

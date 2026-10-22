@@ -950,6 +950,22 @@ describe("makeDimensions heatmap bucket ordering", () => {
     expect(chart.getVisibleDimensionIds()).toEqual(["bucket_1024"])
   })
 
+  it("keeps every bucket when heatmapKeepEmptyRows is set, and crops again when cleared", async () => {
+    const ids = ["0", "1", "2", "3", "4", "5", "6"]
+    const chart = makeHeatmapChart(ids)
+
+    await loadHeatmapPayload(chart, ids, [[0, 0, 1, 0, 2, 0, 0]])
+    expect(chart.getVisibleHeatmapIds()).toEqual(["1", "2", "3", "4", "5"])
+
+    chart.updateAttribute("heatmapKeepEmptyRows", true)
+    expect(chart.getVisibleHeatmapIds()).toEqual(ids)
+    expect(chart.getHeatmapYIndex("0")).toBe(0)
+    expect(chart.getHeatmapYIndex("6")).toBe(6)
+
+    chart.updateAttribute("heatmapKeepEmptyRows", false)
+    expect(chart.getVisibleHeatmapIds()).toEqual(["1", "2", "3", "4", "5"])
+  })
+
   it("crops zero-only buckets from heatmap edges without changing dimension visibility", async () => {
     const ids = ["0", "1", "2", "3", "4", "5", "6"]
     const chart = makeHeatmapChart(ids)

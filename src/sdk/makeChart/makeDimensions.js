@@ -286,7 +286,7 @@ export default (chart, sdk) => {
 
   chart.getVisibleHeatmapIds = () => {
     const ids = getBaseVisibleHeatmapIds()
-    if (!isHeatmap(chart)) return ids
+    if (!isHeatmap(chart) || chart.getAttribute("heatmapKeepEmptyRows")) return ids
 
     const payload = chart.getPayload()
     const key = ids.join("\u0000")
