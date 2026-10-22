@@ -1,7 +1,7 @@
 import { useMemo } from "react"
 import { scaleLinear } from "d3-scale"
 import { color as parseColor } from "d3"
-import { useChart, useAttributeValue } from "@/components/provider"
+import { useChart, useAttributeValue, usePayload } from "@/components/provider"
 import isInXRange from "@/helpers/isInXRange"
 
 export const heatmapTypes = {
@@ -71,8 +71,19 @@ const withOpacity = (value, opacity) => {
   return parsed.formatRgb()
 }
 
-export const makeGetColor = (chart, opacity = 1) => {
+export const getHeatmapMax = chart => {
   const max = Number(chart.getAttribute("max"))
+  if (Number.isFinite(max) && max > 0) return max
+
+  const { byDimension = {} } = chart.getPayload() || {}
+  return Object.values(byDimension).reduce(
+    (largest, stats) => (Number.isFinite(stats?.max) && stats.max > largest ? stats.max : largest),
+    0
+  )
+}
+
+export const makeGetColor = (chart, opacity = 1) => {
+  const max = getHeatmapMax(chart)
   const colors = getHeatmapPalette(chart).map(value => withOpacity(value, opacity))
 
   if (!Number.isFinite(max) || max <= 0) {
@@ -92,6 +103,7 @@ export const makeGetColor = (chart, opacity = 1) => {
 
 export const useGetColor = (opacity = 1) => {
   const chart = useChart()
+  const payload = usePayload()
   const max = useAttributeValue("max")
   const palette = useAttributeValue("heatmapPalette")
   const colorScale = useAttributeValue("heatmapColorScale")
@@ -99,7 +111,7 @@ export const useGetColor = (opacity = 1) => {
 
   return useMemo(
     () => makeGetColor(chart, opacity),
-    [chart, opacity, max, palette, colorScale, theme]
+    [chart, opacity, payload, max, palette, colorScale, theme]
   )
 }
 

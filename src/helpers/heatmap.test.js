@@ -15,6 +15,7 @@ import {
   snapHeatmapRange,
   getHeatmapLabelOffset,
   getMarkedHeatmapCell,
+  getHeatmapMax,
 } from "./heatmap"
 
 describe("heatmap utilities", () => {
@@ -141,6 +142,7 @@ describe("heatmap utilities", () => {
 
     it("uses the low-end color when the heatmap max is zero", () => {
       mockChart.getAttribute = jest.fn(() => 0)
+      mockChart.getPayload = () => ({})
 
       const getColor = makeGetColor(mockChart)
 
@@ -218,6 +220,24 @@ describe("heatmap utilities", () => {
     it("applies the opacity to palette colours", () => {
       const getColor = makeGetColor(chartWith({ heatmapPalette: blues }), 0.4)
       expect(getColor(100)).toBe("rgba(8, 48, 107, 0.4)")
+    })
+  })
+
+  describe("heatmap colour maximum", () => {
+    it("falls back to the largest cell of the payload when max is missing", async () => {
+      const ids = ["1", "2", "3"]
+      const { chart } = makeTestChart({ attributes: { chartType: "heatmap" } })
+      await loadHeatmapPayload(chart, ids, [[1, 10, 4]])
+      chart.updateAttribute("max", undefined)
+
+      expect(getHeatmapMax(chart)).toBe(10)
+      expect(makeGetColor(chart)(10)).toBe("rgb(253, 231, 37)")
+      expect(makeGetColor(chart)(4)).not.toBe(makeGetColor(chart)(1))
+    })
+
+    it("prefers a positive max attribute", () => {
+      const { chart } = makeTestChart({ attributes: { max: 50 } })
+      expect(getHeatmapMax(chart)).toBe(50)
     })
   })
 
