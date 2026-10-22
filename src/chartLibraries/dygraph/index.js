@@ -244,6 +244,8 @@ export default (sdk, chart) => {
       }),
       chart.onAttributeChange("timezone", () => updateOptions({})),
       chart.onAttributeChange("heatmapCellGap", () => updateOptions({})),
+      chart.onAttributeChange("heatmapPalette", () => updateOptions({})),
+      chart.onAttributeChange("heatmapColorScale", () => updateOptions({})),
       chart.onAttributeChange("heatmapKeepEmptyRows", () => {
         if (chart.getAttribute("processing")) return
 

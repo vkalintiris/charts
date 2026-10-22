@@ -452,7 +452,9 @@ describe("dygraphChart", () => {
 
     const before = calls.length
     chart.updateAttribute("heatmapCellGap", 1)
-    expect(calls.length).toBe(before + 1)
+    chart.updateAttribute("heatmapPalette", ["#000", "#fff"])
+    chart.updateAttribute("heatmapColorScale", "log")
+    expect(calls.length).toBe(before + 3)
   })
 
   it("re-ranges the y axis over every row when empty rows are kept", async () => {

@@ -693,7 +693,7 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
-  it("redraws when the cell gap changes", async () => {
+  it("redraws when the cell gap or the colours change", async () => {
     const { chart, instance, element } = await mountHeatmap()
 
     instance.mount(element)
@@ -701,6 +701,11 @@ describe("uplotChart heatmap", () => {
 
     chart.updateAttribute("heatmapCellGap", 1)
     expect(redraw).toHaveBeenCalledWith(false, false)
+
+    redraw.mockClear()
+    chart.updateAttribute("heatmapPalette", ["#000", "#fff"])
+    chart.updateAttribute("heatmapColorScale", "log")
+    expect(redraw).toHaveBeenCalledTimes(2)
 
     redraw.mockRestore()
     cleanup(instance, element)
