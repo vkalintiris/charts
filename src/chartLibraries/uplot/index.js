@@ -7,6 +7,7 @@ import { unregister } from "@/helpers/makeListeners"
 import makeResizeObserver from "@/helpers/makeResizeObserver"
 import limitRange from "@/helpers/limitRange"
 import {
+  isHeatmap,
   makeGetColor,
   withoutPrefix,
   getHeatmapRowsRange,
@@ -1258,7 +1259,6 @@ export default (sdk, chart) => {
       if (wasDrag) return
       if (!chart.getAttribute("enabledNavigation")) return
       if (chart.getAttribute("navigation") !== "pan") return
-      if (chart.getAttribute("enabledClick") === false) return
 
       const rect = over.getBoundingClientRect()
       const offsetX = event.clientX - rect.left
@@ -1268,13 +1268,23 @@ export default (sdk, chart) => {
       const row = chart.getClosestRow(rawMs)
       const snappedX = row === -1 ? null : u.data[0]?.[row]
       const xMs = snappedX == null ? rawMs : snappedX * 1000
+      const dimensionId = getHoverDimension(u)
+
+      if (isHeatmap(chart) && chart.getAttribute("heatmapCellClick")) {
+        if (chart.getHeatmapYIndex(dimensionId) === -1) return
+
+        emitNav("heatmapCellClick", xMs, dimensionId)
+        chart.trigger("heatmapCellClick", xMs, dimensionId)
+        return
+      }
+
+      if (chart.getAttribute("enabledClick") === false) return
 
       chartUI.trigger("click", event, xMs, [])
       if (areAnnotationsDisabled(chart)) return
 
       annotate(offsetX, xMs)
 
-      const dimensionId = getHoverDimension(u)
       emitNav("highlightClick", xMs, dimensionId)
       chart.trigger("highlightClick", xMs, dimensionId)
     }

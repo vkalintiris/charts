@@ -123,6 +123,7 @@ export default {
   heatmapKeepEmptyRows: false,
   heatmapPalette: null,
   heatmapColorScale: "linear",
+  heatmapCellClick: false,
   timezone: undefined,
   locale: undefined,
   syncTimezone: true,

@@ -130,7 +130,17 @@ export default chartUI => {
     chartUI.chart.trigger("annotationCreate", x / 1000)
   }
 
+  const clickCell = (event, x, points) => {
+    const dimensionId = getDimension(event, points)
+    if (chartUI.chart.getHeatmapYIndex(dimensionId) === -1) return
+
+    chartUI.sdk.trigger("heatmapCellClick", chartUI.chart, x, dimensionId)
+    chartUI.chart.trigger("heatmapCellClick", x, dimensionId)
+  }
+
   const click = (event, x, points) => {
+    if (isHeatmap(chartUI.chart) && chartUI.chart.getAttribute("heatmapCellClick"))
+      return clickCell(event, x, points)
     if (areAnnotationsDisabled(chartUI.chart)) return
     if (chartUI.chart.getAttribute("enabledClick") === false) return
     if (lastTimestamp === x) return

@@ -693,6 +693,44 @@ describe("uplotChart heatmap", () => {
     cleanup(instance, element)
   })
 
+  it("reports a clicked cell instead of a chart click when heatmapCellClick is set", async () => {
+    const { sdk, chart, instance, element } = await mountHeatmap({
+      navigation: "pan",
+      heatmapCellClick: true,
+    })
+
+    instance.mount(element)
+    await Promise.resolve()
+    await Promise.resolve()
+    const u = instance.getUPlot()
+    u.over.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 800,
+      height: 300,
+      right: 800,
+      bottom: 300,
+    })
+
+    const cellClicks = []
+    const chartClicks = []
+    sdk.on("heatmapCellClick", (target, x, id) => cellClicks.push([target, x, id]))
+    sdk.on("highlightClick", () => chartClicks.push(true))
+
+    const id = chart.getVisibleHeatmapIds()[2]
+    const clientY = u.valToPos(chart.getHeatmapYIndex(id), "y")
+    u.over.dispatchEvent(new MouseEvent("mousedown", { clientX: 100, clientY, button: 0 }))
+    u.cursor.top = clientY
+    u.cursor.idx = 0
+    document.dispatchEvent(new MouseEvent("mouseup", { clientX: 100, clientY }))
+
+    expect(cellClicks).toEqual([[chart, expect.any(Number), id]])
+    expect(chartClicks).toEqual([])
+    expect(chart.getAttribute("draftAnnotation")).toBeFalsy()
+
+    cleanup(instance, element)
+  })
+
   it("redraws when the cell gap or the colours change", async () => {
     const { chart, instance, element } = await mountHeatmap()
 
