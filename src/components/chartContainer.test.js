@@ -1,10 +1,55 @@
 import React from "react"
-import { screen } from "@testing-library/react"
+import { act, screen, waitFor } from "@testing-library/react"
 import "@testing-library/jest-dom"
-import { renderWithChart } from "@jest/testUtilities"
+import { makeTestChart, renderWithChart } from "@jest/testUtilities"
 import ChartContainer from "./chartContainer"
 
 describe("ChartContainer", () => {
+  it("remounts the current renderer in the same container and cleans up its own UI", async () => {
+    const { sdk, chart } = makeTestChart({ attributes: { autoPlay: false } })
+    await chart.fetch()
+    await waitFor(() => expect(chart.getAttribute("loaded")).toBe(true))
+    const { unmount } = renderWithChart(<ChartContainer />, { chart })
+    const element = screen.getByTestId("chartContent")
+    const dygraph = chart.getUI()
+    expect(dygraph.getElement()).toBe(element)
+    act(() => sdk.getRoot().updateAttribute("timeSeriesRenderer", "uplot"))
+    const uplot = chart.getUI()
+    await waitFor(() => expect(uplot.getElement()).toBe(element))
+    expect(uplot.getUPlot()).not.toBeNull()
+    expect(dygraph.getElement()).toBeNull()
+    act(() => sdk.getRoot().updateAttribute("timeSeriesRenderer", null))
+    const restored = chart.getUI()
+    await waitFor(() => expect(restored.getElement()).toBe(element))
+    expect(restored.getDygraph()).not.toBeNull()
+    expect(uplot.getElement()).toBeNull()
+    unmount()
+    expect(restored.getElement()).toBeNull()
+    chart.destroy()
+  })
+
+  it("mounts the replacement renderer when a chart type change switches it", async () => {
+    const { chart } = makeTestChart({
+      attributes: { autoPlay: false, timeSeriesRenderer: "uplot" },
+    })
+    await chart.fetch()
+    await waitFor(() => expect(chart.getAttribute("loaded")).toBe(true))
+    const { unmount } = renderWithChart(<ChartContainer />, { chart })
+    const element = screen.getByTestId("chartContent")
+    const dygraph = chart.getUI()
+    expect(chart.getAttribute("chartLibrary")).toBe("dygraph")
+    expect(dygraph.getElement()).toBe(element)
+    act(() => chart.updateChartTypeAttribute("line"))
+    const uplot = chart.getUI()
+    expect(chart.getAttribute("chartLibrary")).toBe("uplot")
+    await waitFor(() => expect(uplot.getElement()).toBe(element))
+    await waitFor(() => expect(uplot.getUPlot()).not.toBeNull())
+    expect(dygraph.getElement()).toBeNull()
+    unmount()
+    expect(uplot.getElement()).toBeNull()
+    chart.destroy()
+  })
+
   it("renders container with data-testid", () => {
     renderWithChart(<ChartContainer uiName="default" />)
 
