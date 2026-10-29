@@ -60,7 +60,7 @@ const spanViewAttributes = {
   heatmapTooltipTopFirst: true,
   heatmapTooltipValueOnly: true,
   desiredUnits: ["original"],
-  enabledClick: false,
+  enabledAnnotations: false,
 }
 
 const sameCell = (a, b) => !!a && !!b && a.x === b.x && a.id === b.id

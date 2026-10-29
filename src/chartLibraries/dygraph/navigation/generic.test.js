@@ -184,20 +184,4 @@ describe("generic navigation touch handling", () => {
 
     expect(chartUI.chart.updateAttribute).toHaveBeenCalledWith("clickX", [0, null])
   })
-
-  it("leaves clickX alone on a tap when clicks are disabled", () => {
-    chartUI.chart.getAttribute.mockImplementation(name =>
-      name === "enabledClick" ? false : undefined
-    )
-    const element = document.createElement("div")
-    touchStart(
-      makeTouchEvent([{ target: element, pageX: 10, pageY: 10, clientX: 10, clientY: 10 }]),
-      dygraph,
-      context
-    )
-
-    touchEnd(makeTouchEvent([], [{ screenX: 10, screenY: 10 }]), dygraph, context)
-
-    expect(chartUI.chart.updateAttribute).not.toHaveBeenCalledWith("clickX", expect.anything())
-  })
 })

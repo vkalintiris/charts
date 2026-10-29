@@ -1335,8 +1335,6 @@ export default (sdk, chart) => {
         return
       }
 
-      if (chart.getAttribute("enabledClick") === false) return
-
       chartUI.trigger("click", event, xMs, [])
       if (areAnnotationsDisabled(chart)) return
 
@@ -1479,8 +1477,6 @@ export default (sdk, chart) => {
       if (!touchMoved) {
         const touch = event.changedTouches?.[0]
         if (!touch) return
-
-        if (chart.getAttribute("enabledClick") === false) return
 
         const rect = over.getBoundingClientRect()
         const offsetX = touch.clientX - rect.left

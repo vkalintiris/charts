@@ -148,7 +148,6 @@ export default chartUI => {
     if (isHeatmap(chartUI.chart) && chartUI.chart.getAttribute("heatmapCellClick"))
       return clickCell(event, x, points)
     if (areAnnotationsDisabled(chartUI.chart)) return
-    if (chartUI.chart.getAttribute("enabledClick") === false) return
     if (lastTimestamp === x) return
 
     lastPoints = points
